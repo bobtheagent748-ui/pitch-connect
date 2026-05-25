@@ -1,0 +1,53 @@
+import { useState, useEffect } from 'react'
+import { createClient } from '@/lib/supabase/client'
+import type { RSVP } from '@/lib/types'
+
+export function useRsvps() {
+  const [rsvps, setRsvps] = useState<RSVP[]>([])
+  const [loading, setLoading] = useState(true)
+  const supabase = createClient()
+
+  const refresh = async () => {
+    setLoading(true)
+    const { data, error } = await supabase.from('rsvps').select('*')
+    if (error || !data) {
+      setRsvps([])
+    } else {
+      setRsvps(data)
+    }
+    setLoading(false)
+  }
+
+  useEffect(() => {
+    refresh()
+  }, [])
+
+  const upsertRsvp = async (gameId: string, playerId: string, status: 'yes' | 'no' | 'maybe') => {
+    const { data: existing } = await supabase.from('rsvps')
+      .select('id')
+      .match({ game_id: gameId, player_id: playerId })
+      .single()
+
+    const payload = { game_id: gameId, player_id: playerId, status }
+    
+    if (existing) {
+      await supabase.from('rsvps').update(payload).match({ game_id: gameId, player_id: playerId })
+    } else {
+      await supabase.from('rsvps').insert(payload)
+    }
+
+    // Optimistic update
+    setRsvps(prev => prev.filter(r => !(r.game_id === gameId && r.player_id === playerId))
+                         .concat({ ...payload, id: 'temp', created_at: new Date().toISOString() }))
+    
+    return refresh() // Sync state with DB
+  }
+
+  const deleteRsvp = async (gameId: string, playerId: string) => {
+    await supabase.from('rsvps').delete().match({ game_id: gameId, player_id: playerId })
+    setRsvps(prev => prev.filter(r => !(r.game_id === gameId && r.player_id === playerId)))
+    return refresh()
+  }
+
+  return { rsvps, refresh, upsertRsvp, deleteRsvp, loading }
+}
