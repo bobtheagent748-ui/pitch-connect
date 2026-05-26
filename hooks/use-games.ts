@@ -1,10 +1,8 @@
-'use client'
-
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { NewGameData } from '@/lib/types'
 
-export function useGames() {
+export function useGames(leagueId: string | null = null) {
   const [games, setGames] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -14,11 +12,17 @@ export function useGames() {
     setLoading(true)
     setError(null)
     try {
-      const { data, error: fetchErr } = await supabase
+      let query = supabase
         .from('games')
         .select('*')
         .order('date', { ascending: true })
         .range(0, 100)
+
+      if (leagueId) {
+        query = query.eq('league_id', leagueId)
+      }
+
+      const { data, error: fetchErr } = await query
 
       if (fetchErr) {
         console.error('Error fetching games:', fetchErr)
@@ -35,7 +39,7 @@ export function useGames() {
 
   useEffect(() => {
     refreshGames()
-  }, [])
+  }, [leagueId])
 
   const createGame = async (formData: NewGameData) => {
     setError(null)
@@ -48,6 +52,7 @@ export function useGames() {
           date: formData.date,
           time: formData.time,
           notes: formData.notes || '',
+          league_id: leagueId,
         },
       ])
       .select()
@@ -59,7 +64,6 @@ export function useGames() {
       return
     }
 
-    // Refresh the list after insert
     await refreshGames()
   }
 
@@ -97,7 +101,6 @@ export function useGames() {
       return
     }
 
-    // Refresh the list after delete
     await refreshGames()
   }
 

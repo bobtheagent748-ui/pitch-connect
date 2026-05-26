@@ -14,9 +14,10 @@ export interface ScheduleGameDialogProps {
   editingGame?: any
   createGame: (data: NewGameData) => Promise<void>
   updateGame: (id: string, data: NewGameData) => Promise<void>
+  leagueId?: string | null
 }
 
-export function ScheduleGameDialog({ open, onClose, onSubmitted, editingGame, createGame, updateGame }: ScheduleGameDialogProps) {
+export function ScheduleGameDialog({ open, onClose, onSubmitted, editingGame, createGame, updateGame, leagueId }: ScheduleGameDialogProps) {
   const [formData, setFormData] = useState({
     name: '',
     date: '',
@@ -64,7 +65,7 @@ export function ScheduleGameDialog({ open, onClose, onSubmitted, editingGame, cr
     if (isEditing) {
       await updateGame(editingGame.id, gameData)
     } else {
-      await createGame(gameData)
+      await createGame({ ...gameData, league_id: leagueId })
     }
     
     setFormData({

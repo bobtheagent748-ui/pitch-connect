@@ -5,15 +5,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
-import type { NewPlayerData } from '@/lib/types'
+import type { NewPlayer } from '@/lib/types'
 
 interface AddPlayerDialogProps {
   open: boolean
   onClose: () => void
   onAdded: () => Promise<void>
   editingPlayer?: any
-  addPlayer: (data: NewPlayerData) => Promise<void>
-  updatePlayer?: (id: string, data: NewPlayerData) => Promise<void>
+  addPlayer: (data: NewPlayer) => Promise<void>
+  updatePlayer?: (id: string, data: NewPlayer) => Promise<void>
 }
 
 export function AddPlayerDialog({ open, onClose, onAdded, editingPlayer, addPlayer, updatePlayer }: AddPlayerDialogProps) {
