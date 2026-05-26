@@ -54,7 +54,7 @@ export function ScheduleGameDialog({ open, onClose, onSubmitted, editingGame, cr
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const gameData: NewGameData = {
+    let gameData: NewGameData = {
       field_name: formData.field,
       full_address: formData.address,
       date: formData.date,
@@ -65,7 +65,10 @@ export function ScheduleGameDialog({ open, onClose, onSubmitted, editingGame, cr
     if (isEditing) {
       await updateGame(editingGame.id, gameData)
     } else {
-      await createGame({ ...gameData, league_id: leagueId })
+      if (leagueId) {
+        gameData = { ...gameData, league_id: leagueId }
+      }
+      await createGame(gameData)
     }
     
     setFormData({
