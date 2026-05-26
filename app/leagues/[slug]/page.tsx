@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { use } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useLeague } from '@/lib/league-context'
 import { useLeagues } from '@/hooks/use-leagues'
@@ -13,8 +12,8 @@ import { PlayerList } from '@/components/player-list'
 import { ScheduleGameDialog } from '@/components/schedule-game-dialog'
 import { Calendar, Users, Trophy } from 'lucide-react'
 
-export default function LeagueDashboardPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = use(params)
+export default function LeagueDashboardPage({ params }: { params: { slug: string } }) {
+  const slug = params.slug
   const router = useRouter()
   const pathname = usePathname()
   const { activeLeague, setActiveLeague } = useLeague()
