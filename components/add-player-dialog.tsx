@@ -42,7 +42,7 @@ export function AddPlayerDialog({ open, onClose, onAdded, editingPlayer, addPlay
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const playerData: NewPlayerData = {
+    const playerData: NewPlayer = {
       name: formData.name,
       email: formData.email || '',
       phone: formData.phone || '',
