@@ -8,6 +8,14 @@ const admin = createClient(supabaseUrl, supabaseServiceKey, {
   auth: { persistSession: false },
 })
 
+// Supabase returns timestamptz as ISO strings, but NextAuth expects Date objects
+function fixExpires(s: any) {
+  if (s && typeof s.expires === "string") {
+    return { ...s, expires: new Date(s.expires) }
+  }
+  return s
+}
+
 export function SupabaseAdapter(): Adapter {
   return {
     async createUser(user) {
@@ -121,7 +129,7 @@ export function SupabaseAdapter(): Adapter {
         .select()
         .single()
       if (error) throw error
-      return data
+      return fixExpires(data)
     },
 
     async getSessionAndUser(sessionToken) {
@@ -133,7 +141,7 @@ export function SupabaseAdapter(): Adapter {
       if (error || !session) return null
       const user = await this.getUser!(session.userId)
       if (!user) return null
-      return { session, user }
+      return { session: fixExpires(session), user }
     },
 
     async updateSession(session) {
@@ -165,7 +173,6 @@ export function SupabaseAdapter(): Adapter {
         })
         .select()
         .single()
-      // Handle conflict (token already exists for identifier)
       if (error) {
         await admin
           .from("verification_token")
