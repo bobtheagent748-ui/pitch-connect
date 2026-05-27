@@ -2,8 +2,9 @@ import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { Group } from '@/lib/types'
 
-export function useGroups(userId?: string | null) {
+export function useGroups(userId?: string | null, userEmail?: string | null) {
   const [groups, setGroups] = useState<Group[]>([])
+  const [playerLeagueIds, setPlayerLeagueIds] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
   const supabase = createClient()
 
@@ -19,8 +20,20 @@ export function useGroups(userId?: string | null) {
     } else {
       setGroups(data)
     }
+
+    // Fetch which groups the user is a player in (by email)
+    if (userEmail) {
+      const { data: playerRecords } = await supabase
+        .from('players')
+        .select('league_id')
+        .eq('email', userEmail)
+      if (playerRecords) {
+        setPlayerLeagueIds(new Set(playerRecords.map((p: any) => p.league_id)))
+      }
+    }
+
     setLoading(false)
-  }, [])
+  }, [userEmail])
 
   const createGroup = async (name: string, slug: string, description?: string, ownerId?: string, creatorInfo?: { name: string; email: string; phone?: string; position?: string }) => {
     const payload: Record<string, any> = { name, slug, description }
@@ -64,16 +77,14 @@ export function useGroups(userId?: string | null) {
     refresh()
   }, [refresh])
 
-  // When auth is wired up, pass userId to filter groups:
-  // - myGroups: groups the user owns (owner_id === userId)
-  // - joinedGroups: groups the user is a member/invited to (in league_members but not owner)
-  // For now without auth, show all groups in both sections
+  // myGroups: groups the user owns (owner_id === userId)
+  // joinedGroups: groups where user is registered as a player (not the owner)
   const myGroups = userId
     ? groups.filter(g => g.owner_id === userId)
     : groups
 
-  const joinedGroups = userId
-    ? groups.filter(g => g.owner_id !== userId)
+  const joinedGroups = userId && userEmail
+    ? groups.filter(g => g.owner_id !== userId && playerLeagueIds.has(g.id))
     : []
 
   return { groups, myGroups, joinedGroups, loading, refresh, createGroup, deleteGroup, getGroupBySlug }

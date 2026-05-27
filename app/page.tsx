@@ -10,7 +10,8 @@ export default function Home() {
   const router = useRouter()
   const { data: session, status } = useSession()
   const userId = session?.user?.id || null
-  const { myGroups, joinedGroups, loading, createGroup, deleteGroup, refresh } = useGroups(userId)
+  const userEmail = session?.user?.email || null
+  const { myGroups, joinedGroups, loading, createGroup, deleteGroup, refresh } = useGroups(userId, userEmail)
   const [showCreate, setShowCreate] = useState(false)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
