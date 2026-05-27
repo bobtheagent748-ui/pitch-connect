@@ -26,6 +26,11 @@ export default function GroupDashboardPage({ params }: { params: { slug: string 
   const { players, refreshPlayers, addPlayer, updatePlayer, deletePlayer, error: playersError } = usePlayers(groupId)
   const { rsvps, upsertRsvp, deleteRsvp, refresh: refreshRsvps } = useRsvps(groupId)
 
+  // Debug: expose for browser console testing
+  useEffect(() => {
+    (window as any).__pc = { groupId, slug, createGame, addPlayer }
+  }, [groupId, slug, createGame, addPlayer])
+
   const [showSchedule, setShowSchedule] = useState(false)
   const [showAddPlayer, setShowAddPlayer] = useState(false)
   const [editingGame, setEditingGame] = useState<any>(null)
