@@ -43,7 +43,7 @@ export function Header() {
         <div className="flex items-center gap-4">
           <Link href="/" className="flex items-center gap-2 text-red-500 font-bold text-lg">
             <Trophy className="w-6 h-6" />
-            PitchConnect
+            The Pitch Connect
           </Link>
           
           {isGroupPage && currentGroupName && (

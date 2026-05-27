@@ -9,7 +9,11 @@ export function useGroups(userId?: string | null) {
 
   const refresh = useCallback(async () => {
     setLoading(true)
-    const { data, error } = await supabase.from('leagues').select('*').order('created_at', { ascending: false })
+    const { data, error } = await supabase
+      .from('leagues')
+      .select('*')
+      .is('deleted_at', null)
+      .order('created_at', { ascending: false })
     if (error || !data) {
       setGroups([])
     } else {
@@ -18,21 +22,24 @@ export function useGroups(userId?: string | null) {
     setLoading(false)
   }, [])
 
-  const createGroup = async (name: string, slug: string, description?: string) => {
-    await supabase.from('leagues').insert({ name, slug, description })
+  const createGroup = async (name: string, slug: string, description?: string, ownerId?: string) => {
+    const payload: Record<string, any> = { name, slug, description }
+    if (ownerId) payload.owner_id = ownerId
+    await supabase.from('leagues').insert(payload)
     await refresh()
     return slug
   }
 
   const deleteGroup = async (id: string) => {
-    await supabase.from('leagues').delete().match({ id })
+    await supabase.from('leagues').update({ deleted_at: new Date().toISOString() }).eq('id', id)
     await refresh()
   }
 
   const getGroupBySlug = async (slug: string) => {
     const { data, error } = await supabase.from('leagues')
       .select('*')
-      .match({ slug })
+      .is('deleted_at', null)
+      .eq('slug', slug)
       .single()
     if (error || !data) return null
     return data

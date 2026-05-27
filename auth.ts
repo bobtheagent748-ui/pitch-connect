@@ -6,7 +6,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: SupabaseAdapter(),
   providers: [
     Resend({
-      from: process.env.AUTH_RESEND_FROM || "PitchConnect <onboarding@resend.dev>",
+      from: process.env.AUTH_RESEND_FROM || "The Pitch Connect <onboarding@resend.dev>",
     }),
   ],
   pages: {

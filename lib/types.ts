@@ -39,6 +39,7 @@ export type Group = {
   slug: string
   description: string | null
   owner_id: string | null
+  deleted_at: string | null
   created_at: string
 }
 

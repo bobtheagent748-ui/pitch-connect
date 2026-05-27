@@ -44,6 +44,21 @@ export function ScheduleGameDialog({ open, onClose, onSubmitted, editingGame, cr
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Validate date format
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/
+    if (!dateRegex.test(formData.date)) {
+      alert('Date must be in YYYY-MM-DD format (e.g., 2026-06-15)')
+      return
+    }
+
+    // Validate time format
+    const timeRegex = /^\d{2}:\d{2}$/
+    if (!timeRegex.test(formData.time)) {
+      alert('Time must be in HH:MM format (e.g., 14:30)')
+      return
+    }
+
     const gameData: any = {
       league_id: groupId,
       field_name: formData.field,
@@ -93,7 +108,7 @@ export function ScheduleGameDialog({ open, onClose, onSubmitted, editingGame, cr
               <Label htmlFor="date">Date *</Label>
               <Input
                 id="date"
-                type="date"
+                placeholder="YYYY-MM-DD"
                 value={formData.date}
                 onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                 required
@@ -103,7 +118,7 @@ export function ScheduleGameDialog({ open, onClose, onSubmitted, editingGame, cr
               <Label htmlFor="time">Time *</Label>
               <Input
                 id="time"
-                type="time"
+                placeholder="HH:MM"
                 value={formData.time}
                 onChange={(e) => setFormData({ ...formData, time: e.target.value })}
                 required

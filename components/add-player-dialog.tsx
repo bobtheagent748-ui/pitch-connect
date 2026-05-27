@@ -21,7 +21,6 @@ export function AddPlayerDialog({ open, onClose, onAdded, editingPlayer, addPlay
     name: '',
     email: '',
     phone: '',
-    whatsapp: '',
     position: '',
   })
 
@@ -32,7 +31,6 @@ export function AddPlayerDialog({ open, onClose, onAdded, editingPlayer, addPlay
         name: editingPlayer.name || '',
         email: editingPlayer.email || '',
         phone: editingPlayer.phone || '',
-        whatsapp: editingPlayer.whatsapp || '',
         position: editingPlayer.position || '',
       })
     }
@@ -56,12 +54,12 @@ export function AddPlayerDialog({ open, onClose, onAdded, editingPlayer, addPlay
     
     onClose()
     await onAdded()
-    setFormData({ name: '', email: '', phone: '', whatsapp: '', position: '' })
+    setFormData({ name: '', email: '', phone: '', position: '' })
   }
 
   const handleCancel = () => {
     onClose()
-    setFormData({ name: '', email: '', phone: '', whatsapp: '', position: '' })
+    setFormData({ name: '', email: '', phone: '', position: '' })
   }
 
   return (
@@ -94,25 +92,14 @@ export function AddPlayerDialog({ open, onClose, onAdded, editingPlayer, addPlay
             />
           </div>
           
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="phone">Phone</Label>
-              <Input
-                id="phone"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                placeholder="+1 555-0123"
-              />
-            </div>
-            <div>
-              <Label htmlFor="whatsapp">WhatsApp</Label>
-              <Input
-                id="whatsapp"
-                value={formData.whatsapp}
-                onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
-                placeholder="+1 555-0123"
-              />
-            </div>
+          <div>
+            <Label htmlFor="phone">Phone</Label>
+            <Input
+              id="phone"
+              value={formData.phone}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              placeholder="+1 555-0123"
+            />
           </div>
           
           <div>

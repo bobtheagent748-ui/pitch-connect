@@ -2,12 +2,15 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import { useGroups } from '@/hooks/use-groups'
 import { Trophy, Plus, Users2, Shield, UserPlus, ArrowRight, X, Pencil, Trash2 } from 'lucide-react'
 
 export default function Home() {
   const router = useRouter()
-  const { myGroups, joinedGroups, loading, createGroup, deleteGroup, refresh } = useGroups()
+  const { data: session } = useSession()
+  const userId = session?.user?.id || null
+  const { myGroups, joinedGroups, loading, createGroup, deleteGroup, refresh } = useGroups(userId)
   const [showCreate, setShowCreate] = useState(false)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
@@ -26,7 +29,7 @@ export default function Home() {
     if (!name.trim()) return
     setCreating(true)
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
-    await createGroup(name, slug, description)
+    await createGroup(name, slug, description, userId || undefined)
     await refresh()
     setName('')
     setDescription('')
@@ -78,7 +81,7 @@ export default function Home() {
     return (
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">PitchConnect</h1>
+          <h1 class="text-4xl font-bold text-gray-900 mb-2">The Pitch Connect</h1>
           <p className="text-gray-600">Organize your soccer games with groups</p>
         </div>
         <div className="bg-gray-50 rounded-xl p-12 text-center border border-dashed border-gray-200">
@@ -100,7 +103,7 @@ export default function Home() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="text-center mb-10">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">PitchConnect</h1>
+          <h1 class="text-4xl font-bold text-gray-900 mb-2">The Pitch Connect</h1>
         <p className="text-gray-600">Your soccer groups at a glance</p>
       </div>
 

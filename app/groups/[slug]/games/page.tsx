@@ -89,7 +89,7 @@ export default function GroupDashboardPage({ params }: { params: { slug: string 
           </p>
         </div>
         <button
-          onClick={() => setShowSchedule(true)}
+          onClick={() => activeTab === 'games' ? setShowSchedule(true) : setShowAddPlayer(true)}
           className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2"
         >
           <Plus className="w-4 h-4" />

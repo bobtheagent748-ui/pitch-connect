@@ -9,7 +9,7 @@ import { auth } from "@/auth"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "PitchConnect — Soccer Game Coordination",
+  title: "The Pitch Connect — Soccer Game Coordination",
   description: "Schedule games, track players, coordinate your soccer group",
 }
 
