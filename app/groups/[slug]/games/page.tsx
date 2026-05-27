@@ -34,11 +34,10 @@ export default function GroupDashboardPage({ params }: { params: { slug: string 
   const [activeTab, setActiveTab] = useState<Tab>('games')
   const displayError = gamesError || playersError
 
+  // Sync active group to current URL slug on navigation
   useEffect(() => {
-    if (!activeGroup) {
-      setActiveGroup(slug)
-    }
-  }, [activeGroup, slug, setActiveGroup])
+    setActiveGroup(slug)
+  }, [slug, setActiveGroup])
 
   const handleEditGame = (game: any) => {
     setEditingGame(game)
