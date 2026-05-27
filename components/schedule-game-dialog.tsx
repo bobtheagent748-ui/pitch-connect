@@ -19,34 +19,24 @@ export interface ScheduleGameDialogProps {
 
 export function ScheduleGameDialog({ open, onClose, onSubmitted, editingGame, createGame, updateGame, groupId }: ScheduleGameDialogProps) {
   const [formData, setFormData] = useState({
-    name: '',
-    date: '',
-    time: '',
     field: '',
     address: '',
+    date: '',
+    time: '',
     notes: '',
   })
 
-  // Populate form when editing
   useEffect(() => {
     if (editingGame) {
       setFormData({
-        name: editingGame.field_name || '',
-        date: editingGame.date || '',
-        time: editingGame.time || '',
         field: editingGame.field_name || '',
         address: editingGame.full_address || '',
+        date: editingGame.date || '',
+        time: editingGame.time || '',
         notes: editingGame.notes || '',
       })
     } else {
-      setFormData({
-        name: '',
-        date: '',
-        time: '',
-        field: '',
-        address: '',
-        notes: '',
-      })
+      setFormData({ field: '', address: '', date: '', time: '', notes: '' })
     }
   }, [editingGame])
 
@@ -62,34 +52,20 @@ export function ScheduleGameDialog({ open, onClose, onSubmitted, editingGame, cr
       time: formData.time,
       notes: formData.notes,
     }
-    
+
     if (isEditing) {
       await updateGame(editingGame.id, gameData)
     } else {
       await createGame(gameData)
     }
-    
-    setFormData({
-      name: '',
-      date: '',
-      time: '',
-      field: '',
-      address: '',
-      notes: '',
-    })
+
+    setFormData({ field: '', address: '', date: '', time: '', notes: '' })
     onClose()
     onSubmitted()
   }
 
   const handleCancel = () => {
-    setFormData({
-      name: '',
-      date: '',
-      time: '',
-      field: '',
-      address: '',
-      notes: '',
-    })
+    setFormData({ field: '', address: '', date: '', time: '', notes: '' })
     onClose()
   }
 
@@ -99,22 +75,22 @@ export function ScheduleGameDialog({ open, onClose, onSubmitted, editingGame, cr
         <DialogHeader>
           <DialogTitle>{isEditing ? 'Edit Game' : 'Schedule New Game'}</DialogTitle>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="game-name">Game Name</Label>
+            <Label htmlFor="field">Field / Location *</Label>
             <Input
-              id="game-name"
-              placeholder="e.g., Weekend Group"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              id="field"
+              placeholder="e.g., Jackson Field A"
+              value={formData.field}
+              onChange={(e) => setFormData({ ...formData, field: e.target.value })}
               required
             />
           </div>
-          
+
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="date">Date</Label>
+              <Label htmlFor="date">Date *</Label>
               <Input
                 id="date"
                 type="date"
@@ -124,7 +100,7 @@ export function ScheduleGameDialog({ open, onClose, onSubmitted, editingGame, cr
               />
             </div>
             <div>
-              <Label htmlFor="time">Time</Label>
+              <Label htmlFor="time">Time *</Label>
               <Input
                 id="time"
                 type="time"
@@ -134,17 +110,7 @@ export function ScheduleGameDialog({ open, onClose, onSubmitted, editingGame, cr
               />
             </div>
           </div>
-          
-          <div>
-            <Label htmlFor="field">Field Name</Label>
-            <Input
-              id="field"
-              placeholder="e.g., Jackson Field A"
-              value={formData.field}
-              onChange={(e) => setFormData({ ...formData, field: e.target.value })}
-            />
-          </div>
-          
+
           <div>
             <Label htmlFor="address">Address</Label>
             <Input
@@ -154,7 +120,7 @@ export function ScheduleGameDialog({ open, onClose, onSubmitted, editingGame, cr
               onChange={(e) => setFormData({ ...formData, address: e.target.value })}
             />
           </div>
-          
+
           <div>
             <Label htmlFor="notes">Notes</Label>
             <Input
@@ -164,15 +130,15 @@ export function ScheduleGameDialog({ open, onClose, onSubmitted, editingGame, cr
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
             />
           </div>
-          
+
           <div className="flex gap-2 pt-4">
             <Button type="button" variant="outline" onClick={handleCancel} className="flex-1">
               Cancel
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="flex-1 bg-red-500 hover:bg-red-600"
-              disabled={!formData.date || !formData.time}
+              disabled={!formData.field || !formData.date || !formData.time}
             >
               {isEditing ? 'Update Game' : 'Create Game'}
             </Button>
