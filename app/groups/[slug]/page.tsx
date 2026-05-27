@@ -21,9 +21,10 @@ export default function GroupDashboardPage({ params }: { params: { slug: string 
   const slug = params.slug
   const { activeGroup, setActiveGroup } = useGroup()
   const { groups } = useGroups()
-  const { games, refreshGames, createGame, updateGame, deleteGame } = useGames(activeGroup)
-  const { players, refreshPlayers, addPlayer, updatePlayer, deletePlayer } = usePlayers(activeGroup)
-  const { rsvps, upsertRsvp, deleteRsvp, refresh: refreshRsvps } = useRsvps(activeGroup)
+  const groupId = groups?.find(g => g.slug === slug)?.id || null
+  const { games, refreshGames, createGame, updateGame, deleteGame } = useGames(groupId)
+  const { players, refreshPlayers, addPlayer, updatePlayer, deletePlayer } = usePlayers(groupId)
+  const { rsvps, upsertRsvp, deleteRsvp, refresh: refreshRsvps } = useRsvps(groupId)
 
   const [showSchedule, setShowSchedule] = useState(false)
   const [showAddPlayer, setShowAddPlayer] = useState(false)
@@ -178,7 +179,7 @@ export default function GroupDashboardPage({ params }: { params: { slug: string 
                   await deleteRsvp(gameId, playerId)
                   await refreshRsvps()
                 }}
-                groupId={activeGroup}
+                groupId={groupId}
               />
             ))
           )}
@@ -210,7 +211,7 @@ export default function GroupDashboardPage({ params }: { params: { slug: string 
         editingGame={editingGame}
         createGame={createGame}
         updateGame={updateGame}
-        groupId={activeGroup}
+        groupId={groupId}
       />
 
       {showDeleteConfirm && showDeleteConfirm.type === 'game' && (
