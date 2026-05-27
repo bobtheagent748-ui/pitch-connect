@@ -17,6 +17,16 @@ function fixExpires(s: any) {
 }
 
 export function SupabaseAdapter(): Adapter {
+  async function getUser(id: string) {
+    const { data, error } = await admin
+      .from("users")
+      .select()
+      .eq("id", id)
+      .maybeSingle()
+    if (error) throw error
+    return data
+  }
+
   return {
     async createUser(user) {
       const { data, error } = await admin
@@ -33,15 +43,7 @@ export function SupabaseAdapter(): Adapter {
       return data
     },
 
-    async getUser(id) {
-      const { data, error } = await admin
-        .from("users")
-        .select()
-        .eq("id", id)
-        .maybeSingle()
-      if (error) throw error
-      return data
-    },
+    getUser,
 
     async getUserByEmail(email) {
       const { data, error } = await admin
@@ -61,7 +63,7 @@ export function SupabaseAdapter(): Adapter {
         .eq("providerAccountId", providerAccountId)
         .maybeSingle()
       if (error || !account) return null
-      return this.getUser!(account.userId)
+      return getUser(account.userId)
     },
 
     async updateUser(user) {
@@ -139,7 +141,7 @@ export function SupabaseAdapter(): Adapter {
         .eq("sessionToken", sessionToken)
         .maybeSingle()
       if (error || !session) return null
-      const user = await this.getUser!(session.userId)
+      const user = await getUser(session.userId)
       if (!user) return null
       return { session: fixExpires(session), user }
     },
