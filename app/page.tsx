@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useGroups } from '@/hooks/use-groups'
@@ -8,13 +8,20 @@ import { Trophy, Plus, Users2, Shield, UserPlus, ArrowRight, X, Pencil, Trash2 }
 
 export default function Home() {
   const router = useRouter()
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const userId = session?.user?.id || null
   const { myGroups, joinedGroups, loading, createGroup, deleteGroup, refresh } = useGroups(userId)
   const [showCreate, setShowCreate] = useState(false)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [creating, setCreating] = useState(false)
+
+  // Redirect to signin if not authenticated
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.replace('/signin')
+    }
+  }, [status, router])
 
   // Edit state
   const [editingGroup, setEditingGroup] = useState<{ id: string; name: string; description: string } | null>(null)
@@ -76,6 +83,14 @@ export default function Home() {
   }
 
   const hasAnyGroups = (myGroups && myGroups.length > 0) || (joinedGroups && joinedGroups.length > 0)
+
+  if (status === 'loading') {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-16 flex justify-center">
+        <div className="w-6 h-6 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
+  }
 
   if (!hasAnyGroups && !showCreate) {
     return (
