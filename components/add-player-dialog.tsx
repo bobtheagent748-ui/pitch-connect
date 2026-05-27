@@ -10,7 +10,7 @@ import type { NewPlayer } from '@/lib/types'
 interface AddPlayerDialogProps {
   open: boolean
   onClose: () => void
-  onAdded: () => Promise<void>
+  onAdded: (playerData: any) => Promise<void>
   editingPlayer?: any
   addPlayer: (data: any) => Promise<any | null>
   updatePlayer?: (id: string, data: any) => Promise<void>
@@ -53,7 +53,7 @@ export function AddPlayerDialog({ open, onClose, onAdded, editingPlayer, addPlay
     }
     
     onClose()
-    await onAdded()
+    await onAdded(playerData)
     setFormData({ name: '', email: '', phone: '', position: '' })
   }
 
@@ -82,13 +82,14 @@ export function AddPlayerDialog({ open, onClose, onAdded, editingPlayer, addPlay
           </div>
           
           <div>
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">Email *</Label>
             <Input
               id="email"
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               placeholder="john@example.com"
+              required
             />
           </div>
           

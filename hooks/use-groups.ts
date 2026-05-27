@@ -22,10 +22,25 @@ export function useGroups(userId?: string | null) {
     setLoading(false)
   }, [])
 
-  const createGroup = async (name: string, slug: string, description?: string, ownerId?: string) => {
+  const createGroup = async (name: string, slug: string, description?: string, ownerId?: string, creatorInfo?: { name: string; email: string; phone?: string; position?: string }) => {
     const payload: Record<string, any> = { name, slug, description }
     if (ownerId) payload.owner_id = ownerId
-    await supabase.from('leagues').insert(payload)
+    const { data: group, error } = await supabase.from('leagues').insert(payload).select().single()
+    if (error || !group) {
+      await refresh()
+      return ''
+    }
+    
+    // Auto-add creator as a player in the group
+    if (creatorInfo && creatorInfo.email) {
+      await supabase.from('players').insert({
+        league_id: group.id,
+        name: creatorInfo.name || creatorInfo.email,
+        email: creatorInfo.email,
+        phone: creatorInfo.phone || '',
+      })
+    }
+    
     await refresh()
     return slug
   }

@@ -36,7 +36,10 @@ export default function Home() {
     if (!name.trim()) return
     setCreating(true)
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
-    await createGroup(name, slug, description, userId || undefined)
+    await createGroup(name, slug, description, userId || undefined, {
+      name: session?.user?.name || '',
+      email: session?.user?.email || '',
+    })
     await refresh()
     setName('')
     setDescription('')

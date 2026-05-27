@@ -22,6 +22,7 @@ export default function GroupDashboardPage({ params }: { params: { slug: string 
   const { activeGroup, setActiveGroup } = useGroup()
   const { groups } = useGroups()
   const groupId = groups?.find(g => g.slug === slug)?.id || null
+  const groupName = groups?.find(g => g.slug === slug)?.name || slug
   const { games, refreshGames, createGame, updateGame, deleteGame, error: gamesError } = useGames(groupId)
   const { players, refreshPlayers, addPlayer, updatePlayer, deletePlayer, error: playersError } = usePlayers(groupId)
   const { rsvps, upsertRsvp, deleteRsvp, refresh: refreshRsvps } = useRsvps(groupId)
@@ -245,10 +246,17 @@ export default function GroupDashboardPage({ params }: { params: { slug: string 
             setShowAddPlayer(false)
             setEditingPlayer(null)
           }}
-          onAdded={async () => {
+          onAdded={async (playerData: any) => {
             setShowAddPlayer(false)
             setEditingPlayer(null)
             await refreshPlayers()
+            if (playerData?.email) {
+              fetch('/api/invite', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: playerData.email, groupName, type: 'invited' }),
+              }).catch(() => {})
+            }
           }}
           addPlayer={addPlayer}
           updatePlayer={updatePlayer}
