@@ -1,186 +1,153 @@
 'use client'
 
-import { useState } from 'react'
-import { useGames } from '@/hooks/use-games'
-import { usePlayers } from '@/hooks/use-players'
-import { useRsvps } from '@/hooks/use-rsvps'
-import { GameCard } from '@/components/game-card'
-import { PlayerList } from '@/components/player-list'
-import { ScheduleGameDialog } from '@/components/schedule-game-dialog'
-import { AddPlayerDialog } from '@/components/add-player-dialog'
-import { Calendar, Users, Plus } from 'lucide-react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
+import { useRouter } from 'next/navigation'
+import { useGroups } from '@/hooks/use-groups'
+import { Trophy, Plus, Users2, Shield, UserPlus, ArrowRight } from 'lucide-react'
+import Link from 'next/link'
 
 export default function Home() {
-  const { games, refreshGames, createGame, updateGame, deleteGame } = useGames()
-  const { players, refreshPlayers, addPlayer, updatePlayer, deletePlayer } = usePlayers()
-  const { rsvps, upsertRsvp, deleteRsvp, refresh } = useRsvps()
-  const [showSchedule, setShowSchedule] = useState(false)
-  const [showAddPlayer, setShowAddPlayer] = useState(false)
-  const [editingGame, setEditingGame] = useState<any>(null)
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null)
+  const router = useRouter()
+  const { myGroups, joinedGroups, loading } = useGroups()
 
-  const handleEdit = (game: any) => {
-    setEditingGame(game)
-    setShowSchedule(true)
+  if (loading) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="text-center py-12">
+          <div className="animate-pulse space-y-4">
+            <div className="h-8 bg-gray-200 rounded w-64 mx-auto" />
+            <div className="h-4 bg-gray-100 rounded w-48 mx-auto" />
+          </div>
+        </div>
+      </div>
+    )
   }
 
-  const handleDeleteClick = (gameId: string) => {
-    setShowDeleteConfirm(gameId)
-  }
+  const hasAnyGroups = (myGroups && myGroups.length > 0) || (joinedGroups && joinedGroups.length > 0)
 
-  const handleDeleteConfirm = async () => {
-    if (showDeleteConfirm) {
-      await deleteGame(showDeleteConfirm)
-      setShowDeleteConfirm(null)
-    }
+  // No groups at all — empty state
+  if (!hasAnyGroups) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">PitchConnect</h1>
+          <p className="text-gray-600">Organize your soccer games with groups</p>
+        </div>
+        <div className="bg-gray-50 rounded-xl p-12 text-center border border-dashed border-gray-200">
+          <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">No groups yet</h2>
+          <p className="text-gray-600 mb-6">Create your first group to start scheduling games and inviting players.</p>
+          <Link
+            href="/groups"
+            className="inline-flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg text-lg font-medium transition"
+          >
+            <Plus className="w-5 h-5" />
+            Create your first group
+          </Link>
+        </div>
+      </div>
+    )
   }
-
-  const handleScheduleClose = () => {
-    setShowSchedule(false)
-    setEditingGame(null)
-  }
-
-  const handleScheduleSubmitted = () => {
-    setEditingGame(null)
-    refreshGames()
-  }
-
-  const handleRsvp = async (gameId: string, playerId: string, status: 'yes' | 'no' | 'maybe') => {
-    await upsertRsvp(gameId, playerId, status)
-    refresh()
-  }
-
-  const handleRemoveRsvp = async (gameId: string, playerId: string) => {
-    await deleteRsvp(gameId, playerId)
-    refresh()
-  }
-
-  const upcomingGames = games
-    .filter(g => new Date(g.date) >= new Date())
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      {/* Hero Section */}
-      <div className="text-center mb-12">
+      {/* Hero */}
+      <div className="text-center mb-10">
         <h1 className="text-4xl font-bold text-gray-900 mb-2">PitchConnect</h1>
-        <p className="text-gray-600">Schedule games & track who's coming</p>
+        <p className="text-gray-600">Your soccer groups at a glance</p>
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex gap-3 mb-8 justify-center">
-        <button
-          onClick={() => setShowSchedule(true)}
-          className="bg-red-500 hover:bg-red-600 text-white font-medium px-4 py-2 rounded-lg text-sm flex items-center gap-2"
-        >
-          <Calendar className="w-4 h-4" />
-          Schedule Game
-        </button>
-        <button
-          onClick={() => setShowAddPlayer(true)}
-          className="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium px-4 py-2 rounded-lg text-sm flex items-center gap-2"
-        >
-          <Plus className="w-4 h-4" />
-          Add Player
-        </button>
-      </div>
+      {/* My Groups Section */}
+      <section className="mb-10">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold flex items-center gap-2">
+            <Shield className="w-5 h-5 text-red-500" />
+            My Groups
+          </h2>
+          <Link
+            href="/groups"
+            className="flex items-center gap-1.5 bg-red-500 hover:bg-red-600 text-white text-sm font-medium px-3 py-1.5 rounded-lg transition"
+          >
+            <Plus className="w-4 h-4" />
+            Create Group
+          </Link>
+        </div>
 
-      {/* Upcoming Games */}
-      <section className="mb-12">
-        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-          <Calendar className="w-5 h-5 text-red-500" />
-          Upcoming Games
-        </h2>
-        {upcomingGames.length === 0 ? (
-          <div className="bg-gray-50 rounded-lg p-8 text-center">
-            <p className="text-gray-600 mb-2">No upcoming games</p>
-            <button
-              onClick={() => setShowSchedule(true)}
-              className="text-red-500 hover:text-red-600 font-medium"
-            >
-              Schedule your first game →
-            </button>
+        {myGroups && myGroups.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {myGroups.map(group => (
+              <div
+                key={group.id}
+                onClick={() => router.push(`/groups/${group.slug}`)}
+                className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm hover:shadow-md hover:border-red-200 transition cursor-pointer group"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="bg-red-50 rounded-lg p-2.5 shrink-0 group-hover:bg-red-100 transition">
+                    <Trophy className="w-5 h-5 text-red-500" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-gray-900 truncate">{group.name}</h3>
+                    <p className="text-xs text-gray-400 mt-0.5">/{group.slug}</p>
+                    {group.description && (
+                      <p className="text-sm text-gray-500 mt-1.5 line-clamp-2">{group.description}</p>
+                    )}
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-red-400 transition shrink-0 mt-1" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : (
-          <div className="space-y-3">
-            {upcomingGames.map(game => (
-            <GameCard
-              key={game.id}
-              game={game}
-              players={players}
-              rsvps={rsvps}
-              onRefresh={refreshGames}
-              onEdit={handleEdit}
-              onDelete={handleDeleteClick}
-              onRsvp={handleRsvp}
-              onDeleteRsvp={handleRemoveRsvp}
-            />
-            ))}
+          <div className="bg-gray-50 rounded-lg p-8 text-center border border-dashed border-gray-200">
+            <Users2 className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+            <p className="text-gray-500 text-sm">No groups yet</p>
+            <Link href="/groups" className="text-red-500 hover:text-red-600 text-sm font-medium mt-1 inline-block">
+              Create your first group →
+            </Link>
           </div>
         )}
       </section>
 
-      {/* Players */}
+      {/* Joined Groups Section */}
       <section>
-        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-          <Users className="w-5 h-5 text-red-500" />
-          Players ({players.length})
-        </h2>
-        <PlayerList
-          players={players}
-          onRefresh={refreshPlayers}
-          rsvps={rsvps}
-        />
-      </section>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold flex items-center gap-2">
+            <UserPlus className="w-5 h-5 text-blue-500" />
+            Joined Groups
+          </h2>
+        </div>
 
-      {/* Modals */}
-      <ScheduleGameDialog
-        open={showSchedule}
-        onClose={handleScheduleClose}
-        onSubmitted={handleScheduleSubmitted}
-        editingGame={editingGame}
-        createGame={createGame}
-        updateGame={updateGame}
-      />
-      <Dialog
-        open={!!showDeleteConfirm}
-        onOpenChange={(open) => !open && setShowDeleteConfirm(null)}
-      >
-        <DialogContent className="sm:max-w-sm">
-          <DialogHeader>
-            <DialogTitle>Delete Game</DialogTitle>
-          </DialogHeader>
-          <p className="text-gray-600 mb-4">Are you sure you want to delete this game? This action cannot be undone.</p>
-          <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              onClick={() => setShowDeleteConfirm(null)} 
-              className="flex-1"
-            >
-              Cancel
-            </Button>
-            <Button 
-              variant="destructive" 
-              onClick={handleDeleteConfirm} 
-              className="flex-1"
-            >
-              Delete
-            </Button>
+        {joinedGroups && joinedGroups.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {joinedGroups.map(group => (
+              <div
+                key={group.id}
+                onClick={() => router.push(`/groups/${group.slug}`)}
+                className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm hover:shadow-md hover:border-blue-200 transition cursor-pointer group"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="bg-blue-50 rounded-lg p-2.5 shrink-0 group-hover:bg-blue-100 transition">
+                    <UserPlus className="w-5 h-5 text-blue-500" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-gray-900 truncate">{group.name}</h3>
+                    <p className="text-xs text-gray-400 mt-0.5">/{group.slug}</p>
+                    {group.description && (
+                      <p className="text-sm text-gray-500 mt-1.5 line-clamp-2">{group.description}</p>
+                    )}
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-blue-400 transition shrink-0 mt-1" />
+                </div>
+              </div>
+            ))}
           </div>
-        </DialogContent>
-      </Dialog>
-      <AddPlayerDialog
-        open={showAddPlayer}
-        onClose={() => setShowAddPlayer(false)}
-        onAdded={async () => {
-          refreshPlayers()
-          setShowAddPlayer(false)
-        }}
-        addPlayer={addPlayer}
-        updatePlayer={updatePlayer}
-      />
+        ) : (
+          <div className="bg-gray-50 rounded-lg p-8 text-center border border-dashed border-gray-200">
+            <UserPlus className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+            <p className="text-gray-500 text-sm">You haven't joined any groups yet</p>
+            <p className="text-gray-400 text-xs mt-1">Groups you're invited to will appear here</p>
+          </div>
+        )}
+      </section>
     </div>
   )
 }

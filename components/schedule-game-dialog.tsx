@@ -14,10 +14,10 @@ export interface ScheduleGameDialogProps {
   editingGame?: any
   createGame: (data: NewGameData) => Promise<void>
   updateGame: (id: string, data: NewGameData) => Promise<void>
-  leagueId?: string | null
+  groupId?: string | null
 }
 
-export function ScheduleGameDialog({ open, onClose, onSubmitted, editingGame, createGame, updateGame, leagueId }: ScheduleGameDialogProps) {
+export function ScheduleGameDialog({ open, onClose, onSubmitted, editingGame, createGame, updateGame, groupId }: ScheduleGameDialogProps) {
   const [formData, setFormData] = useState({
     name: '',
     date: '',
@@ -54,7 +54,8 @@ export function ScheduleGameDialog({ open, onClose, onSubmitted, editingGame, cr
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    let gameData: NewGameData = {
+    const gameData: any = {
+      league_id: groupId,
       field_name: formData.field,
       full_address: formData.address,
       date: formData.date,
@@ -65,9 +66,6 @@ export function ScheduleGameDialog({ open, onClose, onSubmitted, editingGame, cr
     if (isEditing) {
       await updateGame(editingGame.id, gameData)
     } else {
-      if (leagueId) {
-        gameData = { ...gameData, league_id: leagueId }
-      }
       await createGame(gameData)
     }
     
@@ -107,7 +105,7 @@ export function ScheduleGameDialog({ open, onClose, onSubmitted, editingGame, cr
             <Label htmlFor="game-name">Game Name</Label>
             <Input
               id="game-name"
-              placeholder="e.g., Sunday League"
+              placeholder="e.g., Weekend Group"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               required

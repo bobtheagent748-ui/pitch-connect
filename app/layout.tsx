@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import { Header } from "@/components/header"
-import { LeagueProvider } from "@/lib/league-context"
+import { GroupProvider } from "@/lib/group-context"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -19,12 +19,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <LeagueProvider>
+        <GroupProvider>
           <Header />
           <main className="min-h-screen bg-white">
             {children}
           </main>
-        </LeagueProvider>
+        </GroupProvider>
       </body>
     </html>
   )

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { NewGameData } from '@/lib/types'
 
-export function useGames(leagueId: string | null = null) {
+export function useGames(groupId: string | null = null) {
   const [games, setGames] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -18,8 +18,8 @@ export function useGames(leagueId: string | null = null) {
         .order('date', { ascending: true })
         .range(0, 100)
 
-      if (leagueId) {
-        query = query.eq('league_id', leagueId)
+      if (groupId) {
+        query = query.eq('league_id', groupId)
       }
 
       const { data, error: fetchErr } = await query
@@ -39,7 +39,7 @@ export function useGames(leagueId: string | null = null) {
 
   useEffect(() => {
     refreshGames()
-  }, [leagueId])
+  }, [groupId])
 
   const createGame = async (formData: NewGameData) => {
     setError(null)
@@ -52,7 +52,7 @@ export function useGames(leagueId: string | null = null) {
           date: formData.date,
           time: formData.time,
           notes: formData.notes || '',
-          league_id: leagueId,
+          league_id: groupId,
         },
       ])
       .select()

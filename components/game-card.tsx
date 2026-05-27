@@ -9,6 +9,7 @@ interface GameCardProps {
   players: any[];
   rsvps: any[];
   onRefresh: () => void;
+  groupId?: string | null;
   onDelete?: (gameId: string) => void;
   onEdit?: (game: any) => void;
   onRsvp?: (gameId: string, playerId: string, status: 'yes' | 'no' | 'maybe') => void;
@@ -277,6 +278,7 @@ export function GameCard({ game, players, rsvps, onRefresh, onDelete, onEdit, on
             </div>
           </div>
         )}
+
       </div>
     </div>
   );

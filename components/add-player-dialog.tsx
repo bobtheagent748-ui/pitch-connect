@@ -12,8 +12,8 @@ interface AddPlayerDialogProps {
   onClose: () => void
   onAdded: () => Promise<void>
   editingPlayer?: any
-  addPlayer: (data: NewPlayer) => Promise<void>
-  updatePlayer?: (id: string, data: NewPlayer) => Promise<void>
+  addPlayer: (data: any) => Promise<any | null>
+  updatePlayer?: (id: string, data: any) => Promise<void>
 }
 
 export function AddPlayerDialog({ open, onClose, onAdded, editingPlayer, addPlayer, updatePlayer }: AddPlayerDialogProps) {

@@ -1,0 +1,1 @@
+self.__REACT_LOADABLE_MANIFEST="{\"lib/supabase/client.ts -> @supabase/ssr\":{\"id\":\"lib/supabase/client.ts -> @supabase/ssr\",\"files\":[]}}"

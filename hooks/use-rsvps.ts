@@ -2,14 +2,20 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { RSVP } from '@/lib/types'
 
-export function useRsvps() {
+export function useRsvps(groupId: string | null = null) {
   const [rsvps, setRsvps] = useState<RSVP[]>([])
   const [loading, setLoading] = useState(true)
   const supabase = createClient()
 
   const refresh = async () => {
     setLoading(true)
-    const { data, error } = await supabase.from('rsvps').select('*')
+    let query = supabase.from('rsvps').select('*')
+    
+    if (groupId) {
+      query = query.eq('league_id', groupId)
+    }
+    
+    const { data, error } = await query
     if (error || !data) {
       setRsvps([])
     } else {
@@ -20,7 +26,7 @@ export function useRsvps() {
 
   useEffect(() => {
     refresh()
-  }, [])
+  }, [groupId])
 
   const upsertRsvp = async (gameId: string, playerId: string, status: 'yes' | 'no' | 'maybe') => {
     const { data: existing } = await supabase.from('rsvps')
@@ -28,7 +34,8 @@ export function useRsvps() {
       .match({ game_id: gameId, player_id: playerId })
       .single()
 
-    const payload = { game_id: gameId, player_id: playerId, status }
+    const payload: any = { game_id: gameId, player_id: playerId, status }
+    if (groupId) payload.league_id = groupId
     
     if (existing) {
       await supabase.from('rsvps').update(payload).match({ game_id: gameId, player_id: playerId })
@@ -40,7 +47,7 @@ export function useRsvps() {
     setRsvps(prev => prev.filter(r => !(r.game_id === gameId && r.player_id === playerId))
                          .concat({ ...payload, id: 'temp', created_at: new Date().toISOString() }))
     
-    return refresh() // Sync state with DB
+    return refresh()
   }
 
   const deleteRsvp = async (gameId: string, playerId: string) => {
