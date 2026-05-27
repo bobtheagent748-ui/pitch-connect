@@ -14,24 +14,11 @@ export function usePlayers(groupId: string | null = null) {
     setLoading(true)
     setError(null)
     try {
-      let query = supabase
-        .from('players')
-        .select('*')
-        .order('name', { ascending: true })
-
-      if (groupId) {
-        query = query.eq('league_id', groupId)
-      }
-
+      let query = supabase.from('players').select('*').order('name', { ascending: true })
+      if (groupId) query = query.eq('league_id', groupId)
       const { data, error: fetchErr } = await query
-
-      if (fetchErr) {
-        console.error('Error fetching players:', fetchErr)
-        setError(fetchErr.message)
-      } else if (data) {
-        console.log('Players loaded:', data)
-        setPlayers(data)
-      }
+      if (fetchErr) { console.error('Error fetching players:', fetchErr); setError(fetchErr.message) }
+      else if (data) { console.log('Players loaded:', data); setPlayers(data) }
     } catch (err: any) {
       console.error('Error fetching players:', err)
       setError(err.message || 'Failed to load players')
@@ -39,26 +26,21 @@ export function usePlayers(groupId: string | null = null) {
     setLoading(false)
   }
 
-  useEffect(() => {
-    refreshPlayers()
-  }, [groupId])
+  useEffect(() => { refreshPlayers() }, [groupId])
 
-  const  addPlayer = async (formData: NewPlayer) => {
+  const addPlayer = async (formData: NewPlayer) => {
     setError(null)
+    console.log('[usePlayers] addPlayer: groupId=', groupId, 'formData=', formData)
     if (!groupId) {
-      setError('No active group selected')
+      const msg = 'No active group selected'
+      console.error('[usePlayers]', msg)
+      setError(msg)
       return null
     }
-
     try {
       const { data, error: insertErr } = await supabase
         .from('players')
-        .insert([{
-          name: formData.name,
-          email: formData.email || null,
-          phone: formData.phone || null,
-          league_id: groupId,
-        }])
+        .insert([{ name: formData.name, email: formData.email || null, phone: formData.phone || null, league_id: groupId }])
         .select()
         .single()
 
@@ -67,54 +49,48 @@ export function usePlayers(groupId: string | null = null) {
         setError(insertErr.message)
         return null
       }
-
+      console.log('[usePlayers] Player created:', data)
       await refreshPlayers()
       return data
     } catch (err: any) {
-      console.error('[usePlayers] Unexpected error in addPlayer:', err)
+      console.error('[usePlayers] Exception adding player:', err)
       setError(err.message || 'Failed to add player')
       return null
     }
   }
 
-  const  updatePlayer = async (playerId: string, formData: NewPlayer) => {
+  const updatePlayer = async (playerId: string, formData: NewPlayer) => {
     setError(null)
-    const { error: updateErr } = await supabase
-      .from('players')
-      .update({
-        name: formData.name,
-        email: formData.email || null,
-        phone: formData.phone || null,
-      })
-      .eq('id', playerId)
+    try {
+      const { error: updateErr } = await supabase
+        .from('players')
+        .update({ name: formData.name, email: formData.email || null, phone: formData.phone || null })
+        .eq('id', playerId)
 
-    if (updateErr) {
-      console.error('Error updating player:', updateErr)
-      setError(updateErr.message)
-      return
+      if (updateErr) {
+        console.error('[usePlayers] Error updating player:', updateErr)
+        setError(updateErr.message)
+        return
+      }
+      await refreshPlayers()
+    } catch (err: any) {
+      console.error('[usePlayers] Exception updating player:', err)
+      setError(err.message || 'Failed to update player')
     }
-
-    await refreshPlayers()
   }
 
   const deletePlayer = async (playerId: string) => {
+    setError(null)
     try {
-      const { data, error: deleteErr } = await supabase
-        .from('players')
-        .delete()
-        .eq('id', playerId)
-        .select()
-
+      const { error: deleteErr } = await supabase.from('players').delete().eq('id', playerId)
       if (deleteErr) {
         console.error('[usePlayers] Error deleting player:', deleteErr)
         setError(deleteErr.message)
         return null
       }
-
       await refreshPlayers()
-      return data
     } catch (err: any) {
-      console.error('[usePlayers] Unexpected error in deletePlayer:', err)
+      console.error('[usePlayers] Exception deleting player:', err)
       setError(err.message || 'Failed to delete player')
       return null
     }

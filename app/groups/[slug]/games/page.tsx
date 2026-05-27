@@ -22,8 +22,8 @@ export default function GroupDashboardPage({ params }: { params: { slug: string 
   const { activeGroup, setActiveGroup } = useGroup()
   const { groups } = useGroups()
   const groupId = groups?.find(g => g.slug === slug)?.id || null
-  const { games, refreshGames, createGame, updateGame, deleteGame } = useGames(groupId)
-  const { players, refreshPlayers, addPlayer, updatePlayer, deletePlayer } = usePlayers(groupId)
+  const { games, refreshGames, createGame, updateGame, deleteGame, error: gamesError } = useGames(groupId)
+  const { players, refreshPlayers, addPlayer, updatePlayer, deletePlayer, error: playersError } = usePlayers(groupId)
   const { rsvps, upsertRsvp, deleteRsvp, refresh: refreshRsvps } = useRsvps(groupId)
 
   const [showSchedule, setShowSchedule] = useState(false)
@@ -32,7 +32,7 @@ export default function GroupDashboardPage({ params }: { params: { slug: string 
   const [editingPlayer, setEditingPlayer] = useState<any>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<{type: 'game' | 'player', id: string} | null>(null)
   const [activeTab, setActiveTab] = useState<Tab>('games')
-  const [error, setError] = useState<string | null>(null)
+  const displayError = gamesError || playersError
 
   useEffect(() => {
     if (!activeGroup) {
@@ -140,10 +140,10 @@ export default function GroupDashboardPage({ params }: { params: { slug: string 
         </button>
       </div>
 
-      {error && (
+      {displayError && (
         <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-4 mb-4 flex items-center gap-2">
           <AlertCircle className="w-4 h-4" />
-          <span>{error}</span>
+          <span>{displayError}</span>
         </div>
       )}
 
