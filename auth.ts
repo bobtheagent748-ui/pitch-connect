@@ -1,7 +1,7 @@
 import NextAuth from "next-auth"
 import Resend from "next-auth/providers/resend"
 import { Pool } from "pg"
-import { PostgresAdapter } from "@auth/pg-adapter"
+import PostgresAdapter from "@auth/pg-adapter"
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
