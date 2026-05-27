@@ -55,7 +55,6 @@ export function Header() {
                     <Home className="w-4 h-4" />
                     Home
                   </Link>
-                  <Link href="/groups" onClick={() => setShowDropdown(false)} className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900">All Groups</Link>
                   {groups?.map(group => (
                     <Link
                       key={group.id}
@@ -76,7 +75,6 @@ export function Header() {
         
         <nav className="flex items-center gap-4">
           <Link href="/" className="text-gray-600 hover:text-gray-900 text-sm font-medium">Home</Link>
-          <Link href="/groups" className="text-gray-600 hover:text-gray-900 text-sm font-medium">Groups</Link>
         </nav>
       </div>
     </header>
