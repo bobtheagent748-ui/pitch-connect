@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
 import { useGroup } from '@/lib/group-context'
 import { useGroups } from '@/hooks/use-groups'
-import { Home, Trophy, ChevronDown, LogIn, LogOut } from 'lucide-react'
+import { Home, Trophy, ChevronDown, LogIn, LogOut, User } from 'lucide-react'
 import Link from 'next/link'
 
 export function Header() {
@@ -98,6 +98,14 @@ export function Header() {
                   <div className="px-3 py-2 border-b border-gray-100">
                     <p className="text-xs text-gray-500 truncate">{session.user.email}</p>
                   </div>
+                  <Link
+                    href="/profile"
+                    onClick={() => setShowUserMenu(false)}
+                    className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center gap-2"
+                  >
+                    <User className="w-3.5 h-3.5" />
+                    My Profile
+                  </Link>
                   <button
                     onClick={() => { setShowUserMenu(false); signOut({ callbackUrl: '/' }) }}
                     className="w-full text-left px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center gap-2"
