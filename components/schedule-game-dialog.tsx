@@ -110,7 +110,7 @@ export function ScheduleGameDialog({ open, onClose, onSubmitted, editingGame, cr
               <Label htmlFor="date">Date *</Label>
               <Input
                 id="date"
-                placeholder="YYYY-MM-DD"
+                type="date"
                 value={formData.date}
                 onChange={(e) => { setFormData({ ...formData, date: e.target.value }); setErrors({}) }}
                 required
@@ -122,7 +122,7 @@ export function ScheduleGameDialog({ open, onClose, onSubmitted, editingGame, cr
               <Label htmlFor="time">Time *</Label>
               <Input
                 id="time"
-                placeholder="HH:MM"
+                type="time"
                 value={formData.time}
                 onChange={(e) => { setFormData({ ...formData, time: e.target.value }); setErrors({}) }}
                 required
