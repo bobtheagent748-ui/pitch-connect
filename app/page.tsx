@@ -46,7 +46,7 @@ export default function Home() {
     setDescription('')
     setShowCreate(false)
     setCreating(false)
-    router.push(`/groups/${slug}`)
+    router.push(`/groups/${slug}/games`)
   }
 
   const handleEdit = (group: { id: string; name: string; description: string | null }) => {
@@ -160,7 +160,7 @@ export default function Home() {
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
-                <div onClick={() => router.push(`/groups/${group.slug}`)} className="cursor-pointer">
+                <div onClick={() => router.push(`/groups/${group.slug}/games`)} className="cursor-pointer">
                   <div className="flex items-start gap-3">
                     <div className="bg-red-50 rounded-lg p-2.5 shrink-0">
                       <Trophy className="w-5 h-5 text-red-500" />
@@ -195,7 +195,7 @@ export default function Home() {
         {joinedGroups && joinedGroups.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {joinedGroups.map(group => (
-              <div key={group.id} onClick={() => router.push(`/groups/${group.slug}`)}
+              <div key={group.id} onClick={() => router.push(`/groups/${group.slug}/games`)}
                 className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm hover:shadow-md hover:border-blue-200 transition cursor-pointer group">
                 <div className="flex items-start gap-3">
                   <div className="bg-blue-50 rounded-lg p-2.5 shrink-0"><UserPlus className="w-5 h-5 text-blue-500" /></div>
