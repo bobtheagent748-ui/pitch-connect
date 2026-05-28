@@ -1,22 +1,14 @@
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
 /**
- * Creates a Supabase client. When a supabaseAccessToken is provided
- * (from the NextAuth session), the client authenticates with Supabase
- * so RLS policies can identify the user via auth.uid().
+ * Server-side Supabase client. Uses the service_role key which bypasses
+ * RLS — all access control is enforced in application code.
+ *
+ * NEVER import this in a client component. Use useSupabase() hook instead.
  */
-export function createClient(supabaseAccessToken?: string) {
-  if (supabaseAccessToken) {
-    return createSupabaseClient(supabaseUrl, supabaseAnonKey, {
-      global: {
-        headers: {
-          Authorization: `Bearer ${supabaseAccessToken}`,
-        },
-      },
-    })
-  }
-  return createSupabaseClient(supabaseUrl, supabaseAnonKey)
+export function createClient() {
+  return createSupabaseClient(supabaseUrl, supabaseServiceKey)
 }

@@ -37,7 +37,7 @@ export function useGames(groupId: string | null = null) {
           date: formData.date,
           time: formData.time,
           notes: formData.notes || '',
-          league_id: groupId,
+          league_id: formData.league_id || groupId,
         }])
         .select()
         .single()
