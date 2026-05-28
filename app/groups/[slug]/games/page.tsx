@@ -38,6 +38,8 @@ export default function GroupDashboardPage({ params }: { params: { slug: string 
 
   const { data: session } = useSession()
   const userEmail = session?.user?.email || ''
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
   const handleLeaveGroup = async () => {
     if (!userEmail || !groupId) return
@@ -94,12 +96,12 @@ export default function GroupDashboardPage({ params }: { params: { slug: string 
   }
 
   const upcomingGames = games
-    .filter(g => new Date(g.date) >= new Date())
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    .filter(g => g.date >= todayStr)
+    .sort((a, b) => a.date.localeCompare(b.date))
 
   const pastGames = games
-    .filter(g => new Date(g.date) < new Date())
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .filter(g => g.date < todayStr)
+    .sort((a, b) => b.date.localeCompare(a.date))
 
   const confirmedRsvps = rsvps.filter(r => r.status === 'yes').length
 

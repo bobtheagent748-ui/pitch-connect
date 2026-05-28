@@ -22,7 +22,7 @@ export function GameCard({ game, players, rsvps, onRefresh, onDelete, onEdit, on
   const [showOthers, setShowOthers] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<string>('');
   const [rsvping, setRsvping] = useState(false);
-  const gameDate = new Date(game.date);
+  const gameDate = new Date(game.date + 'T00:00:00');
   const rsvpList = rsvps ? rsvps.filter((r: any) => r.game_id === game.id) : [];
   const yesCount = rsvpList ? rsvpList.filter((r: any) => r.status === 'yes').length : 0;
   const noCount = rsvpList ? rsvpList.filter((r: any) => r.status === 'no').length : 0;
