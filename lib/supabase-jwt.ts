@@ -2,12 +2,18 @@ import { SignJWT } from "jose"
 
 /**
  * Creates a Supabase-compatible JWT from a NextAuth user session.
- * This JWT is used by the Supabase client so RLS policies see auth.uid().
+ * Requires SUPABASE_JWT_SECRET from Supabase Dashboard → Settings → API → JWT Secret.
+ * Falls back gracefully if not configured — the app works but RLS runs as anon.
  */
 export async function createSupabaseJWT(userId: string, email: string) {
-  const secret = new TextEncoder().encode(
-    process.env.SUPABASE_JWT_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
+  const jwtSecret = process.env.SUPABASE_JWT_SECRET
+
+  // Skip JWT signing if secret is not configured
+  if (!jwtSecret) {
+    return null
+  }
+
+  const secret = new TextEncoder().encode(jwtSecret)
 
   return new SignJWT({
     sub: userId,

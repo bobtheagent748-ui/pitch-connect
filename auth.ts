@@ -20,14 +20,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       // Bridge NextAuth to Supabase RLS: sign a Supabase-compatible JWT
       if (session.user?.id && session.user?.email) {
-        try {
-          session.supabaseAccessToken = await createSupabaseJWT(
-            session.user.id,
-            session.user.email
-          )
-        } catch {
-          // JWT signing fails silently — RLS won't apply but the app still works
-        }
+        session.supabaseAccessToken = await createSupabaseJWT(
+          session.user.id,
+          session.user.email
+        )
       }
       return session
     },
