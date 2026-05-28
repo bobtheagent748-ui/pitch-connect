@@ -19,6 +19,7 @@ interface GameCardProps {
 export function GameCard({ game, players, rsvps, onRefresh, onDelete, onEdit, onRsvp, onDeleteRsvp }: GameCardProps) {
   const [expanded, setExpanded] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<string>('');
+  const [rsvping, setRsvping] = useState(false);
   const gameDate = new Date(game.date);
   const rsvpList = rsvps ? rsvps.filter((r: any) => r.game_id === game.id) : [];
   const yesCount = rsvpList ? rsvpList.filter((r: any) => r.status === 'yes').length : 0;
@@ -29,9 +30,11 @@ export function GameCard({ game, players, rsvps, onRefresh, onDelete, onEdit, on
   const pct = totalPlayers > 0 ? Math.round((totalRsvps / totalPlayers) * 100) : 0;
 
   const handleStatus = async (status: 'yes' | 'no' | 'maybe') => {
-    if (!selectedPlayer) return;
+    if (!selectedPlayer || rsvping) return;
     if (onRsvp) {
+      setRsvping(true)
       await onRsvp(game.id, selectedPlayer, status);
+      setRsvping(false)
     }
   };
 
@@ -126,7 +129,8 @@ export function GameCard({ game, players, rsvps, onRefresh, onDelete, onEdit, on
           <select
             value={selectedPlayer}
             onChange={(e) => setSelectedPlayer(e.target.value)}
-            className="text-xs border border-gray-200 rounded-md px-2 py-1.5 bg-gray-50 w-28"
+            disabled={rsvping}
+            className="text-xs border border-gray-200 rounded-md px-2 py-1.5 bg-gray-50 w-28 disabled:opacity-50"
           >
             <option value="">Who are you?</option>
             {players?.map((p: any) => (
@@ -136,36 +140,36 @@ export function GameCard({ game, players, rsvps, onRefresh, onDelete, onEdit, on
 
           <button
             onClick={() => handleStatus('yes')}
-            disabled={!selectedPlayer}
+            disabled={!selectedPlayer || rsvping}
             className={`flex-1 text-xs font-medium py-1.5 rounded-md transition ${
-              selectedPlayer
+              selectedPlayer && !rsvping
                 ? 'bg-green-50 text-green-700 border border-green-200 hover:bg-green-100'
                 : 'bg-gray-50 text-gray-300 border border-gray-100 cursor-not-allowed'
             }`}
           >
-            Yes
+            {rsvping ? '...' : 'Yes'}
           </button>
           <button
             onClick={() => handleStatus('maybe')}
-            disabled={!selectedPlayer}
+            disabled={!selectedPlayer || rsvping}
             className={`flex-1 text-xs font-medium py-1.5 rounded-md transition ${
-              selectedPlayer
+              selectedPlayer && !rsvping
                 ? 'bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100'
                 : 'bg-gray-50 text-gray-300 border border-gray-100 cursor-not-allowed'
             }`}
           >
-            Maybe
+            {rsvping ? '...' : 'Maybe'}
           </button>
           <button
             onClick={() => handleStatus('no')}
-            disabled={!selectedPlayer}
+            disabled={!selectedPlayer || rsvping}
             className={`flex-1 text-xs font-medium py-1.5 rounded-md transition ${
-              selectedPlayer
+              selectedPlayer && !rsvping
                 ? 'bg-red-50 text-red-700 border border-red-200 hover:bg-red-100'
                 : 'bg-gray-50 text-gray-300 border border-gray-100 cursor-not-allowed'
             }`}
           >
-            No
+            {rsvping ? '...' : 'No'}
           </button>
 
           {selectedPlayer && (

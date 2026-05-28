@@ -44,6 +44,7 @@ export function AddPlayerDialog({ open, onClose, onAdded, editingPlayer, addPlay
       name: formData.name,
       email: formData.email || '',
       phone: formData.phone || '',
+      position: formData.position || '',
     }
     
     if (isEditing && updatePlayer) {

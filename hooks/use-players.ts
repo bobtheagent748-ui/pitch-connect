@@ -40,7 +40,7 @@ export function usePlayers(groupId: string | null = null) {
     try {
       const { data, error: insertErr } = await supabase
         .from('players')
-        .insert([{ name: formData.name, email: formData.email || null, phone: formData.phone || null, league_id: groupId }])
+        .insert([{ name: formData.name, email: formData.email || null, phone: formData.phone || null, position: formData.position || null, league_id: groupId }])
         .select()
         .single()
 
@@ -64,7 +64,7 @@ export function usePlayers(groupId: string | null = null) {
     try {
       const { error: updateErr } = await supabase
         .from('players')
-        .update({ name: formData.name, email: formData.email || null, phone: formData.phone || null })
+        .update({ name: formData.name, email: formData.email || null, phone: formData.phone || null, position: formData.position || null })
         .eq('id', playerId)
 
       if (updateErr) {

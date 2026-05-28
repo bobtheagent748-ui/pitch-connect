@@ -1,8 +1,8 @@
 'use client'
 
-import { redirect, usePathname } from 'next/navigation'
+import { redirect } from 'next/navigation'
 
 export default function PlayersPage() {
-  redirect('/groups')
+  redirect('/')
   return null
 }

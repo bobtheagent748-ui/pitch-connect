@@ -19,6 +19,7 @@ export type Player = {
   name: string
   email: string
   phone: string
+  position: string
   created_at: string
 }
 

@@ -25,6 +25,7 @@ export function ScheduleGameDialog({ open, onClose, onSubmitted, editingGame, cr
     time: '',
     notes: '',
   })
+  const [errors, setErrors] = useState<{date?: string; time?: string}>({})
 
   useEffect(() => {
     if (editingGame) {
@@ -45,19 +46,20 @@ export function ScheduleGameDialog({ open, onClose, onSubmitted, editingGame, cr
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    // Validate date format
+    const newErrors: {date?: string; time?: string} = {}
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/
     if (!dateRegex.test(formData.date)) {
-      alert('Date must be in YYYY-MM-DD format (e.g., 2026-06-15)')
-      return
+      newErrors.date = 'Date must be YYYY-MM-DD (e.g., 2026-06-15)'
     }
-
-    // Validate time format
     const timeRegex = /^\d{2}:\d{2}$/
     if (!timeRegex.test(formData.time)) {
-      alert('Time must be in HH:MM format (e.g., 14:30)')
+      newErrors.time = 'Time must be HH:MM (e.g., 14:30)'
+    }
+    if (newErrors.date || newErrors.time) {
+      setErrors(newErrors)
       return
     }
+    setErrors({})
 
     const gameData: any = {
       league_id: groupId,
@@ -110,9 +112,11 @@ export function ScheduleGameDialog({ open, onClose, onSubmitted, editingGame, cr
                 id="date"
                 placeholder="YYYY-MM-DD"
                 value={formData.date}
-                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                onChange={(e) => { setFormData({ ...formData, date: e.target.value }); setErrors({}) }}
                 required
+                className={errors.date ? 'border-red-300' : ''}
               />
+              {errors.date && <p className="text-red-500 text-xs mt-1">{errors.date}</p>}
             </div>
             <div>
               <Label htmlFor="time">Time *</Label>
@@ -120,9 +124,11 @@ export function ScheduleGameDialog({ open, onClose, onSubmitted, editingGame, cr
                 id="time"
                 placeholder="HH:MM"
                 value={formData.time}
-                onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+                onChange={(e) => { setFormData({ ...formData, time: e.target.value }); setErrors({}) }}
                 required
+                className={errors.time ? 'border-red-300' : ''}
               />
+              {errors.time && <p className="text-red-500 text-xs mt-1">{errors.time}</p>}
             </div>
           </div>
 

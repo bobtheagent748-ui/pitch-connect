@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { redirect, usePathname } from 'next/navigation'
 import { useGroup } from '@/lib/group-context'
 import { useGroups } from '@/hooks/use-groups'
 import { useGames } from '@/hooks/use-games'
@@ -11,7 +10,8 @@ import { GameCard } from '@/components/game-card'
 import { PlayerList } from '@/components/player-list'
 import { ScheduleGameDialog } from '@/components/schedule-game-dialog'
 import { AddPlayerDialog } from '@/components/add-player-dialog'
-import { Plus, AlertCircle, Users2, Calendar, Trophy } from 'lucide-react'
+import { useSession } from 'next-auth/react'
+import { Plus, AlertCircle, Users2, Calendar, Trophy, ChevronDown, ChevronUp, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 
@@ -33,7 +33,30 @@ export default function GroupDashboardPage({ params }: { params: { slug: string 
   const [editingPlayer, setEditingPlayer] = useState<any>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<{type: 'game' | 'player', id: string} | null>(null)
   const [activeTab, setActiveTab] = useState<Tab>('games')
+  const [showPastGames, setShowPastGames] = useState(false)
   const displayError = gamesError || playersError
+
+  const { data: session } = useSession()
+  const userEmail = session?.user?.email || ''
+
+  const handleLeaveGroup = async () => {
+    if (!userEmail || !groupId) return
+    const supabase = (await import('@/lib/supabase/client')).createClient()
+    // Find player record for this user in this group
+    const { data: playerRecords } = await supabase
+      .from('players')
+      .select('id')
+      .eq('league_id', groupId)
+      .eq('email', userEmail)
+    if (playerRecords && playerRecords.length > 0) {
+      for (const p of playerRecords) {
+        await supabase.from('players').delete().eq('id', p.id)
+      }
+      await refreshPlayers()
+      await refreshGames()
+      await refreshRsvps()
+    }
+  }
 
   // Sync active group to current URL slug on navigation
   useEffect(() => {
@@ -74,6 +97,10 @@ export default function GroupDashboardPage({ params }: { params: { slug: string 
     .filter(g => new Date(g.date) >= new Date())
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
 
+  const pastGames = games
+    .filter(g => new Date(g.date) < new Date())
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+
   const confirmedRsvps = rsvps.filter(r => r.status === 'yes').length
 
   return (
@@ -96,6 +123,15 @@ export default function GroupDashboardPage({ params }: { params: { slug: string 
           <Plus className="w-4 h-4" />
           {activeTab === 'games' ? 'Schedule Game' : 'Add Player'}
         </button>
+        {userEmail && (
+          <button
+            onClick={handleLeaveGroup}
+            className="ml-2 text-gray-400 hover:text-red-500 text-sm p-2 rounded-lg hover:bg-red-50 transition"
+            title="Leave this group"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
       {/* Stats */}
@@ -150,32 +186,70 @@ export default function GroupDashboardPage({ params }: { params: { slug: string 
       {/* Games Tab */}
       {activeTab === 'games' && (
         <div className="space-y-3">
-          {upcomingGames.length === 0 ? (
+          {upcomingGames.length === 0 && pastGames.length === 0 ? (
             <div className="text-center py-12 bg-gray-50 rounded-lg border border-dashed border-gray-200">
-              <p className="text-gray-600 mb-2">No upcoming games</p>
+              <p className="text-gray-600 mb-2">No games yet</p>
               <button onClick={() => setShowSchedule(true)} className="text-red-500 hover:text-red-600 font-medium">Schedule your first game →</button>
             </div>
           ) : (
-            upcomingGames.map(game => (
-              <GameCard
-                key={game.id}
-                game={game}
-                players={players || []}
-                rsvps={rsvps || []}
-                onRefresh={refreshGames}
-                onEdit={handleEditGame}
-                onDelete={handleGameDeleteClick}
-                onRsvp={async (gameId, playerId, status) => {
-                  await upsertRsvp(gameId, playerId, status)
-                  await refreshRsvps()
-                }}
-                onDeleteRsvp={async (gameId, playerId) => {
-                  await deleteRsvp(gameId, playerId)
-                  await refreshRsvps()
-                }}
-                groupId={groupId}
-              />
-            ))
+            <>
+              {upcomingGames.map(game => (
+                <GameCard
+                  key={game.id}
+                  game={game}
+                  players={players || []}
+                  rsvps={rsvps || []}
+                  onRefresh={refreshGames}
+                  onEdit={handleEditGame}
+                  onDelete={handleGameDeleteClick}
+                  onRsvp={async (gameId, playerId, status) => {
+                    await upsertRsvp(gameId, playerId, status)
+                    await refreshRsvps()
+                  }}
+                  onDeleteRsvp={async (gameId, playerId) => {
+                    await deleteRsvp(gameId, playerId)
+                    await refreshRsvps()
+                  }}
+                  groupId={groupId}
+                />
+              ))}
+
+              {pastGames.length > 0 && (
+                <div className="mt-6">
+                  <button
+                    onClick={() => setShowPastGames(!showPastGames)}
+                    className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 font-medium mb-3"
+                  >
+                    {showPastGames ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                    Past Games ({pastGames.length})
+                  </button>
+                  {showPastGames && (
+                    <div className="space-y-3 opacity-75">
+                      {pastGames.map(game => (
+                        <GameCard
+                          key={game.id}
+                          game={game}
+                          players={players || []}
+                          rsvps={rsvps || []}
+                          onRefresh={refreshGames}
+                          onEdit={handleEditGame}
+                          onDelete={handleGameDeleteClick}
+                          onRsvp={async (gameId, playerId, status) => {
+                            await upsertRsvp(gameId, playerId, status)
+                            await refreshRsvps()
+                          }}
+                          onDeleteRsvp={async (gameId, playerId) => {
+                            await deleteRsvp(gameId, playerId)
+                            await refreshRsvps()
+                          }}
+                          groupId={groupId}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
           )}
         </div>
       )}

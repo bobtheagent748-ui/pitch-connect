@@ -12,11 +12,16 @@ export function Header() {
   const pathname = usePathname()
   const { data: session } = useSession()
   const { activeGroup } = useGroup()
-  const { groups } = useGroups()
+  const userId = session?.user?.id || null
+  const userEmail = session?.user?.email || null
+  const { groups, myGroups, joinedGroups } = useGroups(userId, userEmail)
   const [showDropdown, setShowDropdown] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const userMenuRef = useRef<HTMLDivElement>(null)
+
+  // Only show groups the user owns or is a player in
+  const userGroups = userId ? [...myGroups, ...joinedGroups] : groups
 
   const currentGroupName = activeGroup
     ? groups?.find(g => g.slug === activeGroup)?.name || activeGroup
@@ -62,7 +67,7 @@ export function Header() {
                     <Home className="w-4 h-4" />
                     Home
                   </Link>
-                  {groups?.map(group => (
+                  {userGroups?.map(group => (
                     <Link
                       key={group.id}
                       href={`/groups/${group.slug}/games`}
