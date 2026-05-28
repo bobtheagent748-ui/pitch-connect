@@ -170,7 +170,7 @@ export default function Home() {
                       <p className="text-xs text-gray-400 mt-0.5">/{group.slug}</p>
                       {group.description && <p className="text-sm text-gray-500 mt-1.5 line-clamp-2">{group.description}</p>}
                     </div>
-                    <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-red-400 transition shrink-0 mt-1" />
+                    <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-red-400 transition shrink-0 self-center" />
                   </div>
                 </div>
               </div>
@@ -204,7 +204,7 @@ export default function Home() {
                     <p className="text-xs text-gray-400 mt-0.5">/{group.slug}</p>
                     {group.description && <p className="text-sm text-gray-500 mt-1.5 line-clamp-2">{group.description}</p>}
                   </div>
-                  <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-blue-400 transition shrink-0 mt-1" />
+                  <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-blue-400 transition shrink-0 self-center" />
                 </div>
               </div>
             ))}
