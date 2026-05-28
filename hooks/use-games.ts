@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { useSupabase } from '@/lib/supabase/use-supabase'
 import type { NewGameData } from '@/lib/types'
 
 export function useGames(groupId: string | null = null) {
   const [games, setGames] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const supabase = createClient()
+  const supabase = useSupabase()
 
   const refreshGames = async () => {
     setLoading(true)
@@ -28,7 +28,6 @@ export function useGames(groupId: string | null = null) {
 
   const createGame = async (formData: NewGameData) => {
     setError(null)
-    console.log('[useGames] createGame: groupId=', groupId, 'formData=', formData)
     try {
       const { data, error: insertErr } = await supabase
         .from('games')
@@ -48,7 +47,6 @@ export function useGames(groupId: string | null = null) {
         setError(insertErr.message)
         return
       }
-      console.log('[useGames] Game created:', data)
       await refreshGames()
     } catch (err: any) {
       console.error('[useGames] Exception creating game:', err)

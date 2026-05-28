@@ -8,12 +8,12 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { createClient } from '@/lib/supabase/client'
-const supabase = createClient()
+import { useSupabase } from '@/lib/supabase/use-supabase'
 
 export default function ProfilePage() {
   const router = useRouter()
   const { data: session, status } = useSession()
+  const supabase = useSupabase()
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
   const [formData, setFormData] = useState({

@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { useSupabase } from '@/lib/supabase/use-supabase'
 import type { Group } from '@/lib/types'
 
 export function useGroups(userId?: string | null, userEmail?: string | null) {
   const [groups, setGroups] = useState<Group[]>([])
   const [playerLeagueIds, setPlayerLeagueIds] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
-  const supabase = createClient()
+  const supabase = useSupabase()
 
   const refresh = useCallback(async () => {
     setLoading(true)

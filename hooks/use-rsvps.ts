@@ -1,24 +1,28 @@
 import { useState, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { useSupabase } from '@/lib/supabase/use-supabase'
 import type { RSVP } from '@/lib/types'
 
 export function useRsvps(groupId: string | null = null) {
   const [rsvps, setRsvps] = useState<RSVP[]>([])
   const [loading, setLoading] = useState(true)
-  const supabase = createClient()
+  const [error, setError] = useState<string | null>(null)
+  const supabase = useSupabase()
 
   const refresh = async () => {
     setLoading(true)
+    setError(null)
     let query = supabase.from('rsvps').select('*')
     
     if (groupId) {
       query = query.eq('league_id', groupId)
     }
     
-    const { data, error } = await query
-    if (error || !data) {
+    const { data, error: fetchErr } = await query
+    if (fetchErr) {
+      console.error('Error fetching RSVPs:', fetchErr)
+      setError(fetchErr.message)
       setRsvps([])
-    } else {
+    } else if (data) {
       setRsvps(data)
     }
     setLoading(false)
@@ -56,5 +60,5 @@ export function useRsvps(groupId: string | null = null) {
     return refresh()
   }
 
-  return { rsvps, refresh, upsertRsvp, deleteRsvp, loading }
+  return { rsvps, refresh, upsertRsvp, deleteRsvp, loading, error }
 }

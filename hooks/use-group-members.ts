@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { useSupabase } from '@/lib/supabase/use-supabase'
 
 export function useGroupMembers(groupId: string | null = null) {
   const [members, setMembers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const supabase = createClient()
+  const supabase = useSupabase()
 
   const refresh = async () => {
     setLoading(true)

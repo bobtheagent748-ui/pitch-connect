@@ -1,14 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { useSupabase } from '@/lib/supabase/use-supabase'
 import type { NewPlayer } from '@/lib/types'
 
 export function usePlayers(groupId: string | null = null) {
   const [players, setPlayers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const supabase = createClient()
+  const supabase = useSupabase()
 
   const refreshPlayers = async () => {
     setLoading(true)
