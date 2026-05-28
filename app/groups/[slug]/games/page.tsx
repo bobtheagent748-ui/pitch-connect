@@ -211,6 +211,7 @@ export default function GroupDashboardPage({ params }: { params: { slug: string 
                     await refreshRsvps()
                   }}
                   groupId={groupId}
+                  userEmail={userEmail}
                 />
               ))}
 
@@ -243,6 +244,7 @@ export default function GroupDashboardPage({ params }: { params: { slug: string 
                             await refreshRsvps()
                           }}
                           groupId={groupId}
+                          userEmail={userEmail}
                         />
                       ))}
                     </div>

@@ -10,14 +10,16 @@ interface GameCardProps {
   rsvps: any[];
   onRefresh: () => void;
   groupId?: string | null;
+  userEmail?: string;
   onDelete?: (gameId: string) => void;
   onEdit?: (game: any) => void;
   onRsvp?: (gameId: string, playerId: string, status: 'yes' | 'no' | 'maybe') => void;
   onDeleteRsvp?: (gameId: string, playerId: string) => void;
 }
 
-export function GameCard({ game, players, rsvps, onRefresh, onDelete, onEdit, onRsvp, onDeleteRsvp }: GameCardProps) {
+export function GameCard({ game, players, rsvps, onRefresh, onDelete, onEdit, onRsvp, onDeleteRsvp, userEmail }: GameCardProps) {
   const [expanded, setExpanded] = useState(false);
+  const [showOthers, setShowOthers] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<string>('');
   const [rsvping, setRsvping] = useState(false);
   const gameDate = new Date(game.date);
@@ -29,13 +31,23 @@ export function GameCard({ game, players, rsvps, onRefresh, onDelete, onEdit, on
   const totalPlayers = players?.length || 0;
   const pct = totalPlayers > 0 ? Math.round((totalRsvps / totalPlayers) * 100) : 0;
 
-  const handleStatus = async (status: 'yes' | 'no' | 'maybe') => {
-    if (!selectedPlayer || rsvping) return;
-    if (onRsvp) {
-      setRsvping(true)
-      await onRsvp(game.id, selectedPlayer, status);
-      setRsvping(false)
-    }
+  // Find current user's player record + their RSVP status
+  const currentPlayer = userEmail ? players?.find((p: any) => p.email?.toLowerCase() === userEmail.toLowerCase()) : null;
+  const myRsvp = currentPlayer ? rsvpList?.find((r: any) => r.player_id === currentPlayer.id) : null;
+  const myStatus = myRsvp?.status || null;
+
+  const handleSelfStatus = async (status: 'yes' | 'no' | 'maybe') => {
+    if (!currentPlayer || rsvping || !onRsvp) return;
+    setRsvping(true);
+    await onRsvp(game.id, currentPlayer.id, status);
+    setRsvping(false);
+  };
+
+  const handleOtherStatus = async (status: 'yes' | 'no' | 'maybe') => {
+    if (!selectedPlayer || rsvping || !onRsvp) return;
+    setRsvping(true);
+    await onRsvp(game.id, selectedPlayer, status);
+    setRsvping(false);
   };
 
   const whatsappMessage = encodeURIComponent(
@@ -124,64 +136,100 @@ export function GameCard({ game, players, rsvps, onRefresh, onDelete, onEdit, on
           </div>
         </div>
 
-        {/* Inline RSVP controls */}
-        <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100">
-          <select
-            value={selectedPlayer}
-            onChange={(e) => setSelectedPlayer(e.target.value)}
-            disabled={rsvping}
-            className="text-xs border border-gray-200 rounded-md px-2 py-1.5 bg-gray-50 w-28 disabled:opacity-50"
-          >
-            <option value="">Who are you?</option>
-            {players?.map((p: any) => (
-              <option key={p.id} value={p.id}>{p.name}</option>
-            ))}
-          </select>
+        {/* RSVP controls — Option C: self + others */}
+        <div className="mt-3 pt-3 border-t border-gray-100 space-y-2">
+          {/* Self row */}
+          {currentPlayer ? (
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium text-gray-600 w-8">You:</span>
+              {(['yes', 'maybe', 'no'] as const).map((status) => {
+                const isActive = myStatus === status;
+                const colors = {
+                  yes: isActive ? 'bg-green-500 text-white border-green-500' : 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100',
+                  maybe: isActive ? 'bg-amber-500 text-white border-amber-500' : 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100',
+                  no: isActive ? 'bg-red-500 text-white border-red-500' : 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100',
+                };
+                return (
+                  <button
+                    key={status}
+                    onClick={() => handleSelfStatus(status)}
+                    disabled={rsvping}
+                    className={`flex-1 text-xs font-medium py-1.5 rounded-md border transition ${colors[status]} ${rsvping ? 'opacity-50' : ''}`}
+                  >
+                    {rsvping ? '...' : status.charAt(0).toUpperCase() + status.slice(1)}
+                  </button>
+                );
+              })}
+              {myStatus && (
+                <button
+                  onClick={() => onDeleteRsvp?.(game.id, currentPlayer.id)}
+                  className="text-gray-400 hover:text-red-500 transition shrink-0"
+                  title="Clear my RSVP"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+            </div>
+          ) : (
+            <p className="text-xs text-gray-400 italic">Add yourself as a player to RSVP</p>
+          )}
 
+          {/* Toggle: respond for others */}
           <button
-            onClick={() => handleStatus('yes')}
-            disabled={!selectedPlayer || rsvping}
-            className={`flex-1 text-xs font-medium py-1.5 rounded-md transition ${
-              selectedPlayer && !rsvping
-                ? 'bg-green-50 text-green-700 border border-green-200 hover:bg-green-100'
-                : 'bg-gray-50 text-gray-300 border border-gray-100 cursor-not-allowed'
-            }`}
+            onClick={() => setShowOthers(!showOthers)}
+            className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition"
           >
-            {rsvping ? '...' : 'Yes'}
-          </button>
-          <button
-            onClick={() => handleStatus('maybe')}
-            disabled={!selectedPlayer || rsvping}
-            className={`flex-1 text-xs font-medium py-1.5 rounded-md transition ${
-              selectedPlayer && !rsvping
-                ? 'bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100'
-                : 'bg-gray-50 text-gray-300 border border-gray-100 cursor-not-allowed'
-            }`}
-          >
-            {rsvping ? '...' : 'Maybe'}
-          </button>
-          <button
-            onClick={() => handleStatus('no')}
-            disabled={!selectedPlayer || rsvping}
-            className={`flex-1 text-xs font-medium py-1.5 rounded-md transition ${
-              selectedPlayer && !rsvping
-                ? 'bg-red-50 text-red-700 border border-red-200 hover:bg-red-100'
-                : 'bg-gray-50 text-gray-300 border border-gray-100 cursor-not-allowed'
-            }`}
-          >
-            {rsvping ? '...' : 'No'}
+            <span className={`transition-transform ${showOthers ? 'rotate-45' : ''}`}>+</span>
+            {showOthers ? 'Hide' : 'Respond for someone else'}
           </button>
 
-          {selectedPlayer && (
-            <button
-              onClick={() => onDeleteRsvp?.(game.id, selectedPlayer)}
-              className="text-gray-400 hover:text-red-500 transition"
-              title="Remove your RSVP"
-            >
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+          {/* Others row */}
+          {showOthers && (
+            <div className="flex items-center gap-2">
+              <select
+                value={selectedPlayer}
+                onChange={(e) => setSelectedPlayer(e.target.value)}
+                disabled={rsvping}
+                className="text-xs border border-gray-200 rounded-md px-2 py-1.5 bg-gray-50 w-28 disabled:opacity-50"
+              >
+                <option value="">Pick player</option>
+                {players?.filter((p: any) => p.id !== currentPlayer?.id).map((p: any) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+
+              {(['yes', 'maybe', 'no'] as const).map((status) => {
+                const colors = {
+                  yes: selectedPlayer && !rsvping ? 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100' : 'bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed',
+                  maybe: selectedPlayer && !rsvping ? 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100' : 'bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed',
+                  no: selectedPlayer && !rsvping ? 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100' : 'bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed',
+                };
+                return (
+                  <button
+                    key={status}
+                    onClick={() => handleOtherStatus(status)}
+                    disabled={!selectedPlayer || rsvping}
+                    className={`flex-1 text-xs font-medium py-1.5 rounded-md border transition ${colors[status]}`}
+                  >
+                    {rsvping ? '...' : status.charAt(0).toUpperCase() + status.slice(1)}
+                  </button>
+                );
+              })}
+
+              {selectedPlayer && (
+                <button
+                  onClick={() => onDeleteRsvp?.(game.id, selectedPlayer)}
+                  className="text-gray-400 hover:text-red-500 transition shrink-0"
+                  title="Remove RSVP"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+            </div>
           )}
         </div>
 
