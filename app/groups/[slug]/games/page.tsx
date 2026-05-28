@@ -38,6 +38,9 @@ export default function GroupDashboardPage({ params }: { params: { slug: string 
 
   const { data: session } = useSession()
   const userEmail = session?.user?.email || ''
+  const userId = session?.user?.id || ''
+  const group = groups?.find(g => g.slug === slug)
+  const isOwner = !!(userId && group?.owner_id === userId)
   const today = new Date();
   const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
@@ -125,7 +128,7 @@ export default function GroupDashboardPage({ params }: { params: { slug: string 
           <Plus className="w-4 h-4" />
           {activeTab === 'games' ? 'Schedule Game' : 'Add Player'}
         </button>
-        {userEmail && (
+        {userEmail && !isOwner && (
           <button
             onClick={handleLeaveGroup}
             className="ml-2 text-gray-400 hover:text-red-500 text-sm p-2 rounded-lg hover:bg-red-50 transition"
