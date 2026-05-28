@@ -38,6 +38,20 @@ export function usePlayers(groupId: string | null = null) {
       return null
     }
     try {
+      // Check for duplicate email in this group
+      if (formData.email) {
+        const { data: existing } = await supabase
+          .from('players')
+          .select('id, name')
+          .eq('league_id', groupId)
+          .eq('email', formData.email)
+          .maybeSingle()
+        if (existing) {
+          setError(`${formData.email} is already in this group`)
+          return null
+        }
+      }
+
       const { data, error: insertErr } = await supabase
         .from('players')
         .insert([{ name: formData.name, email: formData.email || null, phone: formData.phone || null, position: formData.position || null, league_id: groupId }])
@@ -46,7 +60,11 @@ export function usePlayers(groupId: string | null = null) {
 
       if (insertErr) {
         console.error('[usePlayers] Error creating player:', insertErr)
-        setError(insertErr.message)
+        if (insertErr.message.includes('duplicate') || insertErr.message.includes('unique')) {
+          setError('A player with this email already exists in this group')
+        } else {
+          setError(insertErr.message)
+        }
         return null
       }
       console.log('[usePlayers] Player created:', data)
