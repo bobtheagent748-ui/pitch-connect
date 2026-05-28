@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useGroups } from '@/hooks/use-groups'
-import { Trophy, Plus, Users2, Shield, UserPlus, ArrowRight, X, Pencil, Trash2 } from 'lucide-react'
+import { Trophy, Plus, Users2, UserPlus, ArrowRight, X, Pencil, Trash2 } from 'lucide-react'
 
 export default function Home() {
   const router = useRouter()
@@ -137,7 +137,7 @@ export default function Home() {
       <section className="mb-10">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold flex items-center gap-2">
-            <Shield className="w-5 h-5 text-red-500" /> My Groups
+            <UserPlus className="w-5 h-5 text-red-500" /> My Groups
           </h2>
           <button onClick={() => setShowCreate(!showCreate)} className="flex items-center gap-1.5 bg-red-500 hover:bg-red-600 text-white text-sm font-medium px-3 py-1.5 rounded-lg transition">
             <Plus className="w-4 h-4" /> Create Group
@@ -163,7 +163,7 @@ export default function Home() {
                 <div onClick={() => router.push(`/groups/${group.slug}/games`)} className="cursor-pointer">
                   <div className="flex items-start gap-3">
                     <div className="bg-red-50 rounded-lg p-2.5 shrink-0">
-                      <Trophy className="w-5 h-5 text-red-500" />
+                      <UserPlus className="w-5 h-5 text-red-500" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-gray-900 truncate">{group.name}</h3>
