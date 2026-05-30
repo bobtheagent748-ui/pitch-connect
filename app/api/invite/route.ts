@@ -1,10 +1,17 @@
 import { NextResponse } from "next/server"
 import { Resend } from "resend"
+import { auth } from "@/../auth"
 
 const resend = new Resend(process.env.AUTH_RESEND_KEY)
 
 export async function POST(request: Request) {
   try {
+    // Require authentication
+    const session = await auth()
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
     const { email, groupName, type } = await request.json()
 
     if (!email || !groupName || !type) {

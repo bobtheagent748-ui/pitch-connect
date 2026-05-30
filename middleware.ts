@@ -21,7 +21,13 @@ export function middleware(request: NextRequest) {
 
   if (!sessionCookie) {
     const signInUrl = new URL("/signin", request.url)
-    signInUrl.searchParams.set("callbackUrl", request.url)
+
+    // Validate callbackUrl is same-origin to prevent open redirect
+    const callbackUrl = new URL(request.url)
+    if (callbackUrl.origin === request.nextUrl.origin) {
+      signInUrl.searchParams.set("callbackUrl", request.url)
+    }
+
     return NextResponse.redirect(signInUrl)
   }
 
