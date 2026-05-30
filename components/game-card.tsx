@@ -1,6 +1,6 @@
 'use client';
 
-import { Calendar, MapPin, ChevronDown, ChevronUp, Pencil, Trash2 } from 'lucide-react';
+import { Calendar, MapPin, ChevronDown, ChevronUp, Pencil, Trash2, Bell } from 'lucide-react';
 import { useState } from 'react';
 import { format } from 'date-fns';
 
@@ -22,6 +22,8 @@ export function GameCard({ game, players, rsvps, onRefresh, onDelete, onEdit, on
   const [showOthers, setShowOthers] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<string>('');
   const [rsvping, setRsvping] = useState(false);
+  const [sendingReminder, setSendingReminder] = useState(false);
+  const [reminderSent, setReminderSent] = useState<number | null>(null);
   const gameDate = new Date(game.date + 'T00:00:00');
   const rsvpList = rsvps ? rsvps.filter((r: any) => r.game_id === game.id) : [];
   const yesCount = rsvpList ? rsvpList.filter((r: any) => r.status === 'yes').length : 0;
@@ -29,7 +31,26 @@ export function GameCard({ game, players, rsvps, onRefresh, onDelete, onEdit, on
   const maybeCount = rsvpList ? rsvpList.filter((r: any) => r.status === 'maybe').length : 0;
   const totalRsvps = yesCount + noCount + maybeCount;
   const totalPlayers = players?.length || 0;
+  const unrepliedCount = totalPlayers - totalRsvps;
   const pct = totalPlayers > 0 ? Math.round((totalRsvps / totalPlayers) * 100) : 0;
+
+  const sendReminder = async () => {
+    setSendingReminder(true);
+    try {
+      const res = await fetch('/api/remind', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ gameId: game.id }),
+      });
+      const data = await res.json();
+      if (data.sent !== undefined) {
+        setReminderSent(data.sent);
+      }
+    } catch (e) {
+      console.error('Failed to send reminder:', e);
+    }
+    setSendingReminder(false);
+  };
 
   // Find current user's player record + their RSVP status
   const currentPlayer = userEmail ? players?.find((p: any) => p.email?.toLowerCase() === userEmail.toLowerCase()) : null;
@@ -232,6 +253,27 @@ export function GameCard({ game, players, rsvps, onRefresh, onDelete, onEdit, on
             </div>
           )}
         </div>
+
+        {/* Reminder */}
+        {unrepliedCount > 0 && (
+          <div className="flex items-center gap-2 mt-2">
+            <button
+              onClick={sendReminder}
+              disabled={sendingReminder}
+              className="flex items-center gap-1.5 text-xs text-amber-600 hover:text-amber-700 font-medium disabled:opacity-50 transition"
+            >
+              <Bell className="w-3.5 h-3.5" />
+              {sendingReminder ? 'Sending...' : `Send reminder to ${unrepliedCount} unreplied`}
+            </button>
+            {(reminderSent !== null || game.reminder_sent_at) && (
+              <span className="text-[10px] text-gray-400">
+                {reminderSent !== null
+                  ? `Sent to ${reminderSent}`
+                  : `Last reminder: ${new Date(game.reminder_sent_at).toLocaleDateString()}`}
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Action buttons + Share */}
         <div className="flex items-center justify-between mt-2">
