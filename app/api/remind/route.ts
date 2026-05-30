@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { Resend } from "resend"
-import { auth } from "@/../auth"
+import { auth } from "@/auth"
 import { createClient } from "@supabase/supabase-js"
 
 const resend = new Resend(process.env.AUTH_RESEND_KEY)
