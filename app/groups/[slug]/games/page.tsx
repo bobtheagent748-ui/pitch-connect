@@ -34,6 +34,7 @@ export default function GroupDashboardPage({ params }: { params: { slug: string 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<{type: 'game' | 'player', id: string} | null>(null)
   const [activeTab, setActiveTab] = useState<Tab>('games')
   const [showPastGames, setShowPastGames] = useState(false)
+  const [showUpcomingGames, setShowUpcomingGames] = useState(false)
   const displayError = gamesError || playersError
 
   const { data: session } = useSession()
@@ -194,10 +195,11 @@ export default function GroupDashboardPage({ params }: { params: { slug: string 
             </div>
           ) : (
             <>
-              {upcomingGames.map(game => (
+              {/* Next upcoming game — always visible */}
+              {upcomingGames.length > 0 && (
                 <GameCard
-                  key={game.id}
-                  game={game}
+                  key={upcomingGames[0].id}
+                  game={upcomingGames[0]}
                   players={players || []}
                   rsvps={rsvps || []}
                   onRefresh={refreshGames}
@@ -214,7 +216,45 @@ export default function GroupDashboardPage({ params }: { params: { slug: string 
                   groupId={groupId}
                   userEmail={userEmail}
                 />
-              ))}
+              )}
+
+              {/* Remaining upcoming games — collapsible */}
+              {upcomingGames.length > 1 && (
+                <div className="mt-6">
+                  <button
+                    onClick={() => setShowUpcomingGames(!showUpcomingGames)}
+                    className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 font-medium mb-3"
+                  >
+                    {showUpcomingGames ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                    Upcoming Games ({upcomingGames.length - 1})
+                  </button>
+                  {showUpcomingGames && (
+                    <div className="space-y-3">
+                      {upcomingGames.slice(1).map(game => (
+                        <GameCard
+                          key={game.id}
+                          game={game}
+                          players={players || []}
+                          rsvps={rsvps || []}
+                          onRefresh={refreshGames}
+                          onEdit={handleEditGame}
+                          onDelete={handleGameDeleteClick}
+                          onRsvp={async (gameId, playerId, status) => {
+                            await upsertRsvp(gameId, playerId, status)
+                            await refreshRsvps()
+                          }}
+                          onDeleteRsvp={async (gameId, playerId) => {
+                            await deleteRsvp(gameId, playerId)
+                            await refreshRsvps()
+                          }}
+                          groupId={groupId}
+                          userEmail={userEmail}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {pastGames.length > 0 && (
                 <div className="mt-6">
