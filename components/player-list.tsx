@@ -47,13 +47,6 @@ export function PlayerList({ players, onRefresh, rsvps, onEdit, onDelete }: Play
       ) : (
         <div className="space-y-2">
           {filtered.map(player => {
-            const playerRsvps = rsvps.filter((r: any) => r.player_id === player.id)
-            const yesCount = playerRsvps.filter((r: any) => r.status === 'yes').length
-            const maybeCount = playerRsvps.filter((r: any) => r.status === 'maybe').length
-            const attendancePct = playerRsvps.length > 0 
-              ? Math.round(((yesCount + maybeCount) / playerRsvps.length) * 100) 
-              : 0
-
             return (
               <div
                 key={player.id}
@@ -68,20 +61,6 @@ export function PlayerList({ players, onRefresh, rsvps, onEdit, onDelete }: Play
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <h3 className="font-medium text-slate-900 truncate">{player.name}</h3>
-                    {/* Attendance badge */}
-                    {playerRsvps.length > 0 && (
-                      <span
-                        className={`shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
-                          attendancePct >= 75 
-                            ? 'bg-green-100 text-green-700' 
-                            : attendancePct >= 50 
-                              ? 'bg-amber-100 text-amber-700' 
-                              : 'bg-slate-100 text-slate-500'
-                        }`}
-                      >
-                        {attendancePct}%
-                      </span>
-                    )}
                   </div>
                   <div className="flex items-center gap-x-3 text-xs text-slate-400 mt-0.5">
                     {player.email && (
@@ -94,11 +73,6 @@ export function PlayerList({ players, onRefresh, rsvps, onEdit, onDelete }: Play
                       <span className="flex">
                         <Phone className="w-3 h-3 inline mr-0.5" />
                         {player.phone}
-                      </span>
-                    )}
-                    {playerRsvps.length > 0 && (
-                      <span className="text-xs text-slate-400">
-                        {yesCount}Y · {maybeCount}M · {playerRsvps.length - yesCount - maybeCount}N
                       </span>
                     )}
                   </div>

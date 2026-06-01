@@ -35,6 +35,8 @@ export default function GroupDashboardPage({ params }: { params: { slug: string 
   const [activeTab, setActiveTab] = useState<Tab>('games')
   const [showPastGames, setShowPastGames] = useState(false)
   const [showUpcomingGames, setShowUpcomingGames] = useState(false)
+  const [pastVisibleCount, setPastVisibleCount] = useState(5)
+  const [upcomingVisibleCount, setUpcomingVisibleCount] = useState(5)
   const displayError = gamesError || playersError
 
   const { data: session } = useSession()
@@ -230,7 +232,7 @@ export default function GroupDashboardPage({ params }: { params: { slug: string 
                   </button>
                   {showUpcomingGames && (
                     <div className="space-y-3">
-                      {upcomingGames.slice(1).map(game => (
+                      {upcomingGames.slice(1, 1 + upcomingVisibleCount).map(game => (
                         <GameCard
                           key={game.id}
                           game={game}
@@ -251,6 +253,14 @@ export default function GroupDashboardPage({ params }: { params: { slug: string 
                           userEmail={userEmail}
                         />
                       ))}
+                      {upcomingGames.length - 1 > upcomingVisibleCount && (
+                        <button
+                          onClick={() => setUpcomingVisibleCount(c => c + 10)}
+                          className="w-full py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-lg transition"
+                        >
+                          Show {Math.min(10, upcomingGames.length - 1 - upcomingVisibleCount)} more
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
@@ -267,7 +277,7 @@ export default function GroupDashboardPage({ params }: { params: { slug: string 
                   </button>
                   {showPastGames && (
                     <div className="space-y-3 opacity-75">
-                      {pastGames.map(game => (
+                      {pastGames.slice(0, pastVisibleCount).map(game => (
                         <GameCard
                           key={game.id}
                           game={game}
@@ -288,6 +298,14 @@ export default function GroupDashboardPage({ params }: { params: { slug: string 
                           userEmail={userEmail}
                         />
                       ))}
+                      {pastGames.length > pastVisibleCount && (
+                        <button
+                          onClick={() => setPastVisibleCount(c => c + 10)}
+                          className="w-full py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-lg transition"
+                        >
+                          Show {Math.min(10, pastGames.length - pastVisibleCount)} more
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>

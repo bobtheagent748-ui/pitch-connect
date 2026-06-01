@@ -269,7 +269,7 @@ export function GameCard({ game, players, rsvps, onRefresh, onDelete, onEdit, on
               <span className="text-[10px] text-gray-400">
                 {reminderSent !== null
                   ? `Sent to ${reminderSent}`
-                  : `Last reminder: ${new Date(game.reminder_sent_at).toLocaleDateString()}`}
+                  : `Last reminder: ${new Date(game.reminder_sent_at).toLocaleString()}`}
               </span>
             )}
           </div>
