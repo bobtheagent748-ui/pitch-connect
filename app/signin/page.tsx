@@ -11,6 +11,8 @@ function SignInForm() {
   const [email, setEmail] = useState("")
   const [sent, setSent] = useState(false)
   const [loading, setLoading] = useState(false)
+  const callbackUrl = searchParams.get("callbackUrl") || "/"
+  const error = searchParams.get("error")
 
   useEffect(() => {
     const emailParam = searchParams.get("email")
@@ -47,6 +49,14 @@ function SignInForm() {
               : "Enter your email to receive a magic sign-in link"}
           </p>
         </div>
+
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+            {error === "Verification"
+              ? "This sign-in link has expired. Please request a new one below."
+              : `Sign-in error: ${error}`}
+          </div>
+        )}
 
         {!sent ? (
           <form onSubmit={handleSubmit} className="space-y-4">

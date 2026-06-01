@@ -203,6 +203,9 @@ export function SupabaseAdapter(): Adapter {
         .eq("token", token)
         .maybeSingle()
       if (error || !data) return null
+      // Check expiry — return null if expired so NextAuth shows proper error
+      const expires = typeof data.expires === "string" ? new Date(data.expires) : data.expires
+      if (expires < new Date()) return null
       await admin
         .from("verification_token")
         .delete()
