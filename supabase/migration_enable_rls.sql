@@ -19,4 +19,23 @@ alter table public.verification_token enable row level security;
 
 -- Supabase ships this helper SECURITY DEFINER function; anon has no business
 -- calling it through /rest/v1/rpc.
-revoke execute on function public.rls_auto_enable() from anon, authenticated, public;
+do $$
+begin
+  if exists (
+    select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+    where n.nspname = 'public' and p.proname = 'rls_auto_enable'
+  ) then
+    revoke execute on function public.rls_auto_enable() from anon, authenticated, public;
+  end if;
+end $$;
+
+-- Leftovers from earlier "RLS on, policies wide open" attempts: with these
+-- in place RLS buys nothing, because every statement matches using (true).
+do $$
+declare pol record;
+begin
+  for pol in select schemaname, tablename, policyname from pg_policies where schemaname = 'public'
+  loop
+    execute format('drop policy if exists %I on %I.%I', pol.policyname, pol.schemaname, pol.tablename);
+  end loop;
+end $$;
