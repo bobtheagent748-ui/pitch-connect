@@ -1,27 +1,29 @@
 'use client'
 
-import { useSession } from 'next-auth/react'
+import { useMemo } from 'react'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-
 /**
- * Hook that creates a Supabase client with the current session's
- * Supabase JWT, so RLS policies can identify the user via auth.uid().
- * When SUPABASE_JWT_SECRET is not configured, falls back to anon client.
+ * Browser Supabase client.
+ *
+ * It talks to our own authenticated proxy (/api/db) instead of PostgREST
+ * directly. The proxy checks the NextAuth session (or the admin cookie)
+ * and forwards with the service key server-side, so no database key ever
+ * reaches the browser and RLS can stay enabled with no anon policies.
  */
 export function useSupabase() {
-  const { data: session } = useSession()
+  return useMemo(() => {
+    const url =
+      typeof window === 'undefined'
+        ? process.env.NEXT_PUBLIC_SUPABASE_URL!
+        : `${window.location.origin}/api/db`
 
-  if (session?.supabaseAccessToken) {
-    return createSupabaseClient(supabaseUrl, supabaseAnonKey, {
-      global: {
-        headers: {
-          Authorization: `Bearer ${session.supabaseAccessToken}`,
-        },
+    return createSupabaseClient(url, 'proxy', {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
       },
     })
-  }
-  return createSupabaseClient(supabaseUrl, supabaseAnonKey)
+  }, [])
 }

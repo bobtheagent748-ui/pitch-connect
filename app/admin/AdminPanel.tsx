@@ -5,10 +5,16 @@ import { createClient } from '@supabase/supabase-js'
 import { LogOut } from 'lucide-react'
 
 const PAGE_SIZE = 25
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Admin requests go through the authenticated /api/db proxy (the admin
+// cookie authorises them); no database key lives in the browser.
+const supabase = createClient(
+  typeof window === 'undefined'
+    ? process.env.NEXT_PUBLIC_SUPABASE_URL!
+    : `${window.location.origin}/api/db`,
+  'proxy',
+  { auth: { persistSession: false, autoRefreshToken: false } }
+)
 
 type Tab = 'groups' | 'games' | 'players'
 

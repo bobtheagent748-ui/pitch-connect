@@ -14,6 +14,7 @@ import { useSession } from 'next-auth/react'
 import { Plus, AlertCircle, Users2, Calendar, Trophy, ChevronDown, ChevronUp, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { useSupabase } from '@/lib/supabase/use-supabase'
 
 type Tab = 'games' | 'players'
 
@@ -40,6 +41,7 @@ export default function GroupDashboardPage({ params }: { params: { slug: string 
   const displayError = gamesError || playersError
 
   const { data: session } = useSession()
+  const supabase = useSupabase()
   const userEmail = session?.user?.email || ''
   const userId = session?.user?.id || ''
   const group = groups?.find(g => g.slug === slug)
@@ -49,7 +51,6 @@ export default function GroupDashboardPage({ params }: { params: { slug: string 
 
   const handleLeaveGroup = async () => {
     if (!userEmail || !groupId) return
-    const supabase = (await import('@/lib/supabase/client')).createClient()
     // Find player record for this user in this group
     const { data: playerRecords } = await supabase
       .from('players')

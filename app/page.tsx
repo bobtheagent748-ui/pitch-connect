@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useGroups } from '@/hooks/use-groups'
+import { useSupabase } from '@/lib/supabase/use-supabase'
 import { Trophy, Plus, Users2, UserPlus, ArrowRight, X, Pencil, Trash2 } from 'lucide-react'
 
 export default function Home() {
@@ -12,6 +13,7 @@ export default function Home() {
   const userId = session?.user?.id || null
   const userEmail = session?.user?.email || null
   const { myGroups, joinedGroups, loading, createGroup, deleteGroup, refresh } = useGroups(userId, userEmail)
+  const supabase = useSupabase()
   const [showCreate, setShowCreate] = useState(false)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
@@ -59,8 +61,6 @@ export default function Home() {
     e.preventDefault()
     if (!editingGroup || !editName.trim()) return
     // Update via Supabase directly since useGroups doesn't have updateGroup yet
-    const { createClient } = await import('@/lib/supabase/client')
-    const supabase = createClient()
     await supabase.from('leagues').update({ name: editName, description: editDescription }).eq('id', editingGroup.id)
     await refresh()
     setEditingGroup(null)
